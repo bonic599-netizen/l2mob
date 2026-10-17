@@ -35,7 +35,6 @@ public class PlayerInfoPacket : ServerPacket
             Identity.PlayerClass = (byte)ReadI();
             Stats.Level = ReadI();
             Stats.Exp = (int)ReadL();
-            Stats.ExpPercent = (float)ReadD();
             Stats.Str = (byte)ReadI();
             Stats.Dex = (byte)ReadI();
             Stats.Con = (byte)ReadI();
@@ -65,7 +64,8 @@ public class PlayerInfoPacket : ServerPacket
             Appearance.Legs = ReadI();
             Appearance.Feet = ReadI();
             ReadI(); //Cloak
-            Appearance.RHand = ReadI();
+            int lrHandObj = ReadI();
+            if (lrHandObj != 0) Appearance.RHand = lrHandObj;
             ReadI(); //Hair
             ReadI(); //Face
 
@@ -83,7 +83,8 @@ public class PlayerInfoPacket : ServerPacket
             Appearance.Legs = ReadI();
             Appearance.Feet = ReadI();
             ReadI(); //Cloak
-            Appearance.RHand = ReadI();
+            int lrHandItem = ReadI();
+            if (lrHandItem != 0) Appearance.RHand = lrHandItem;
             ReadI(); //Hair
             ReadI(); //Face
 
@@ -181,7 +182,7 @@ public class PlayerInfoPacket : ServerPacket
             Appearance.ServerNameColor = ReadI(); //NameColor
             EntityActionInfo.Running = ReadB() == 1;
             ReadI(); //Pledge class
-            ReadI(); //Pledge type
+            ReadH(); //Pledge type
             Appearance.ServerTitleColor = ReadI(); //Title Color
             ReadI(); //Cursed weapon
 

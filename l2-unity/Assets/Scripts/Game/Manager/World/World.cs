@@ -70,6 +70,10 @@ public class World : MonoBehaviour
         {
             return hit.point.y;
         }
+        if (Physics.Raycast(pos + Vector3.up * 50f, Vector3.down, out hit, 150f, _groundMask))
+        {
+            return hit.point.y;
+        }
 
         EnsureFallbackGround(pos);
         return pos.y;

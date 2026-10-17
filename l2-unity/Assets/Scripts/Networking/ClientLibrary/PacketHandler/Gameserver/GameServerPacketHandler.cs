@@ -256,12 +256,21 @@ public class GameServerPacketHandler : ServerPacketHandler
 
         Debug.Log($"Received {packet.Characters.Count} character(s) from server.");
 
-        if (GameManager.Instance.State == GameState.LOGIN_AUTHED)
+        if (GameManager.Instance.State == GameState.LOGIN_AUTHED ||
+            GameManager.Instance.State == GameState.LOGIN_SCREEN ||
+            GameManager.Instance.State == GameState.LOGIN_CONNECTED)
         {
             EventProcessor.Instance.QueueEvent(() =>
             {
                 LoginClient.Instance.Disconnect();
-                GameManager.Instance.NotifyEvent(GameEvent.AUTH_ALLOWED);
+                if (GameManager.Instance.State != GameState.LOGIN_AUTHED)
+                {
+                    GameManager.Instance.ChangeState(GameState.CHAR_SELECT);
+                }
+                else
+                {
+                    GameManager.Instance.NotifyEvent(GameEvent.AUTH_ALLOWED);
+                }
             });
         }
         else if (GameManager.Instance.State == GameState.CHAR_SELECT || GameManager.Instance.State == GameState.CHAR_CREATION)

@@ -41,6 +41,14 @@ public class LobbyCameraBootstrap : MonoBehaviour
         {
             ApplyLobbySceneFixes();
         }
+        else
+        {
+            RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+            RenderSettings.ambientLight = new Color(0.75f, 0.75f, 0.78f);
+            RenderSettings.ambientSkyColor = new Color(0.75f, 0.75f, 0.78f);
+            RenderSettings.ambientIntensity = 1.2f;
+            FixRenderersAndMaterials();
+        }
     }
 
     public static void ApplyLobbySceneFixes()
@@ -97,8 +105,9 @@ public class LobbyCameraBootstrap : MonoBehaviour
 
         // 4. Configure bright, clean ambient lighting
         RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
-        RenderSettings.ambientLight = new Color(0.65f, 0.70f, 0.78f);
-        RenderSettings.ambientIntensity = 1.0f;
+        RenderSettings.ambientLight = new Color(0.75f, 0.75f, 0.78f);
+        RenderSettings.ambientSkyColor = new Color(0.75f, 0.75f, 0.78f);
+        RenderSettings.ambientIntensity = 1.2f;
 
         // 5. Find or create Camera container
         GameObject container = GameObject.Find("Cameras");
@@ -109,7 +118,7 @@ public class LobbyCameraBootstrap : MonoBehaviour
 
         Camera activeCam = Camera.main;
 
-        if (activeCam == null)
+        if (activeCam == null && LoginCameraManager.Instance == null)
         {
             Debug.Log("[LobbyCameraBootstrap] No active MainCamera found. Initializing Lobby cameras...");
 
@@ -160,16 +169,26 @@ public class LobbyCameraBootstrap : MonoBehaviour
             Debug.Log("[LobbyCameraBootstrap] Lobby MainCamera and race cameras initialized successfully.");
         }
 
-        // Set bright sky background on camera
+        // Set Skybox background on camera and only attach free-look controller when running standalone without LoginCameraManager
         if (activeCam != null)
         {
-            activeCam.clearFlags = CameraClearFlags.SolidColor;
+            activeCam.clearFlags = CameraClearFlags.Skybox;
             activeCam.backgroundColor = new Color(0.42f, 0.62f, 0.82f);
-            activeCam.enabled = true;
 
-            if (activeCam.GetComponent<LobbyCameraController>() == null)
+            if (GameManager.Instance == null && LoginCameraManager.Instance == null)
             {
-                activeCam.gameObject.AddComponent<LobbyCameraController>();
+                if (activeCam.GetComponent<LobbyCameraController>() == null)
+                {
+                    activeCam.gameObject.AddComponent<LobbyCameraController>();
+                }
+            }
+            else
+            {
+                var ctrl = activeCam.GetComponent<LobbyCameraController>();
+                if (ctrl != null)
+                {
+                    Object.Destroy(ctrl);
+                }
             }
         }
 
@@ -184,8 +203,8 @@ public class LobbyCameraBootstrap : MonoBehaviour
         int fixedCount = 0;
         foreach (var r in renderers)
         {
-            // Disable light probe sampling from unbaked black probes
-            r.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+            // Enable Spherical Harmonics ambient light sampling (with m_LightProbeSystem: 0 in URP)
+            r.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.BlendProbes;
 
             Material[] mats = r.sharedMaterials;
             for (int i = 0; i < mats.Length; i++)

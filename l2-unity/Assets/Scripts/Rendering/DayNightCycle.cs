@@ -89,7 +89,7 @@ public class DayNightCycle : MonoBehaviour
         // Update main light rotation with sky material
         ShareMainLightRotation();
 
-        if (transform.eulerAngles.x < -1 || transform.eulerAngles.x > 181)
+        if (sunRotation < -1f || sunRotation > 181f)
         {
             _mainLight.intensity = 0;
         }
@@ -122,6 +122,10 @@ public class DayNightCycle : MonoBehaviour
 
     private void UpdateSkyColor()
     {
+        if (_skyboxMaterial == null || !_skyboxMaterial.HasProperty("_GradientColor1"))
+        {
+            return;
+        }
         Color skyColor = _skyboxMaterial.GetColor("_GradientColor1");
         if (_clock.Clock.dawnRatio > 0 && _clock.Clock.dawnRatio < 1)
         {
@@ -244,7 +248,9 @@ public class DayNightCycle : MonoBehaviour
     private void UpdateAmbientLightIntensity()
     {
         // Ambient light intensity
-        RenderSettings.ambientIntensity = AdjustIntensity(_ambientMinIntensity, _ambientMaxIntensity, _clock.Clock.dawnRatio, _clock.Clock.duskRatio); ;
+        float maxAmb = Mathf.Max(_ambientMaxIntensity, 1.0f);
+        float minAmb = Mathf.Max(_ambientMinIntensity, 0.55f);
+        RenderSettings.ambientIntensity = AdjustIntensity(minAmb, maxAmb, _clock.Clock.dawnRatio, _clock.Clock.duskRatio);
     }
 
     private void UpdateAmbientLightColor()
@@ -289,7 +295,9 @@ public class DayNightCycle : MonoBehaviour
     private void UpdateMainLightIntensity()
     {
         // Main light intensity
-        _mainLight.intensity = AdjustIntensity(_mainLightMinIntensity, _mainLightMaxIntensity, _clock.Clock.dawnRatio, _clock.Clock.duskRatio);
+        float maxMain = Mathf.Max(_mainLightMaxIntensity, 1.5f);
+        float minMain = Mathf.Max(_mainLightMinIntensity, 0.6f);
+        _mainLight.intensity = AdjustIntensity(minMain, maxMain, _clock.Clock.dawnRatio, _clock.Clock.duskRatio);
     }
 
     private void UpdateExposureLevels()
@@ -325,6 +333,10 @@ public class DayNightCycle : MonoBehaviour
 
     private void UpdateCloudsOpacity()
     {
+        if (_skyboxMaterial == null || !_skyboxMaterial.HasProperty("_Clouds_Opacity"))
+        {
+            return;
+        }
         if (_clock.Clock.dawnRatio > 0 && _clock.Clock.dawnRatio < 1)
         {
             _skyboxMaterial.SetFloat("_Clouds_Opacity", Mathf.Lerp(_nightCloudsOpacity, _dayCloudsOpcacity, _clock.Clock.dawnRatio));
@@ -349,6 +361,10 @@ public class DayNightCycle : MonoBehaviour
 
     private void UpdateMainLightTexture()
     {
+        if (_skyboxMaterial == null || !_skyboxMaterial.HasProperty("_SunMoon"))
+        {
+            return;
+        }
         // Update texture 
         if (_clock.Clock.dayRatio > 0)
         {
@@ -364,6 +380,10 @@ public class DayNightCycle : MonoBehaviour
 
     private void ShareMainLightRotation()
     {
+        if (_skyboxMaterial == null || !_skyboxMaterial.HasProperty("_MainLightForward"))
+        {
+            return;
+        }
         _skyboxMaterial.SetVector("_MainLightForward", transform.forward);
         _skyboxMaterial.SetVector("_MainLightUp", transform.up);
         _skyboxMaterial.SetVector("_MainLightRight", transform.right);

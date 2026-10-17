@@ -63,9 +63,7 @@ public class CharSelectionInfoPacket : ServerPacket
 
             character.Sp = ReadI();
             character.Exp = (int)ReadL();
-            character.ExpPercent = (float)ReadD();
             stats.Level = ReadI();
-            // character.ExpPercent = ReadF();
 
             character.Karma = ReadI();
             character.PkKills = ReadI();
@@ -93,7 +91,8 @@ public class CharSelectionInfoPacket : ServerPacket
             appearance.Legs = ReadI();
             appearance.Feet = ReadI();
             ReadI(); //Cloak
-            appearance.RHand = ReadI();
+            int lrHandObj = ReadI();
+            if (lrHandObj != 0) appearance.RHand = lrHandObj;
             ReadI(); //Hair
             ReadI(); //Face
 
@@ -111,7 +110,8 @@ public class CharSelectionInfoPacket : ServerPacket
             appearance.Legs = ReadI();
             appearance.Feet = ReadI();
             ReadI(); //Cloak
-            appearance.RHand = ReadI();
+            int lrHandItem = ReadI();
+            if (lrHandItem != 0) appearance.RHand = lrHandItem;
             ReadI(); //Hair
             ReadI(); //Face
 

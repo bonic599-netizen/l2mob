@@ -64,13 +64,10 @@ public class CharSelectedPacket : ServerPacket
             _info.Stats.Dex = (byte)ReadI();
             _info.Stats.Wit = (byte)ReadI();
 
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < 34; i++)
             {
                 ReadI();
             }
-
-            ReadI();
-            ReadI();
 
             _info.CurrentGameTime = ReadI(); //Game time
 

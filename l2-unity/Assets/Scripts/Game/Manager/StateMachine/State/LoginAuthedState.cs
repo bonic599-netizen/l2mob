@@ -2,10 +2,13 @@ using UnityEngine;
 
 public class LoginAuthedState : GameStateBase
 {
+    private bool _playAllowed = false;
+
     public LoginAuthedState(GameManager stateMachine) : base(stateMachine) { }
 
     public override void Enter(object arg0)
     {
+        _playAllowed = false;
         L2LoginUI.Instance.ShowLicenseWindow();
     }
 
@@ -19,14 +22,18 @@ public class LoginAuthedState : GameStateBase
         switch (evt)
         {
             case GameEvent.LOGIN_DISCONNECTED:
-                L2LoginUI.Instance.ShowLoginWindow();
-                _stateMachine.ChangeState(GameState.LOGIN_SCREEN);
+                if (!_playAllowed && (GameClient.Instance == null || !GameClient.Instance.IsConnected))
+                {
+                    L2LoginUI.Instance.ShowLoginWindow();
+                    _stateMachine.ChangeState(GameState.LOGIN_SCREEN);
+                }
                 break;
             case GameEvent.SERVER_LIST_RECEIVED:
                 L2LoginUI.Instance.ShowServerSelectWindow();
                 ServerSelectWindow.Instance.UpdateServerList((ServerListPacket)arg0);
                 break;
             case GameEvent.PLAY_ALLOWED:
+                _playAllowed = true;
                 GameClient.Instance.Connect();
                 break;
             case GameEvent.AUTH_ALLOWED:
