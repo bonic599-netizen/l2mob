@@ -20,7 +20,17 @@ public class ArmorgrpTable
 
     private Dictionary<int, Armorgrp> _armorgrps;
 
-    public Dictionary<int, Armorgrp> ArmorGrps { get { return _armorgrps; } }
+    public Dictionary<int, Armorgrp> ArmorGrps
+    {
+        get
+        {
+            if (_armorgrps == null)
+            {
+                ReadArmorGrpDat();
+            }
+            return _armorgrps;
+        }
+    }
 
     public void Initialize()
     {
@@ -29,9 +39,7 @@ public class ArmorgrpTable
 
     public void ClearTable()
     {
-        _armorgrps.Clear();
-        _armorgrps = null;
-        _instance = null;
+        // Retain armorgrps in memory to support dynamic equips and models
     }
 
     private void ReadArmorGrpDat()

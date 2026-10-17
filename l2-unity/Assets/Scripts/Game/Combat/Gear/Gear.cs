@@ -133,7 +133,7 @@ public class Gear : MonoBehaviour
 
             EquipWeapon(appearance.LHand, weapon, true);
         }
-        else if (!(appearance.RHand != 0 && _rightHandWeaponData.Weapongrp.BodyPart == ItemSlot.SLOT_LR_HAND))
+        else if (!(appearance.RHand != 0 && _rightHandWeaponData != null && _rightHandWeaponData.Weapongrp != null && _rightHandWeaponData.Weapongrp.BodyPart == ItemSlot.SLOT_LR_HAND))
         {
             // Unequip the weapon in left hand if it's not duals or fists
             UnequipWeapon(true);

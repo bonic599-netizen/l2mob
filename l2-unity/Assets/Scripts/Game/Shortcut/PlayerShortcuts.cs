@@ -52,7 +52,7 @@ public class PlayerShortcuts : MonoBehaviour
 
     private void VerifySkillbarInputs()
     {
-        if (InputManager.Instance == null || InputManager.Instance.SkillbarInputs.Length == 0)
+        if (InputManager.Instance == null || InputManager.Instance.SkillbarInputs == null || InputManager.Instance.SkillbarInputs.Length == 0 || _shortcuts == null)
         {
             return;
         }

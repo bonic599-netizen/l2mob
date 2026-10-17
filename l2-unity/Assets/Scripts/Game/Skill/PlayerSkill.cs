@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -117,14 +117,18 @@ public class PlayerSkill : MonoBehaviour
 
     public void UseSkill(int skillId)
     {
-        if (_skills.TryGetValue(skillId, out SkillInfo skill))
+        if (_skills == null)
         {
-            PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_SKILL, skill);
+            _skills = new Dictionary<int, SkillInfo>();
         }
-        else
+
+        if (!_skills.TryGetValue(skillId, out SkillInfo skill) || skill == null)
         {
-            Debug.LogWarning("Skill not found.");
+            skill = new SkillInfo(skillId, 1, false, false);
+            _skills[skillId] = skill;
         }
+
+        PlayerStateMachine.Instance.ChangeIntention(Intention.INTENTION_SKILL, skill);
     }
 
     public void OnSkillUsed(int skillId, int reuseDelay)

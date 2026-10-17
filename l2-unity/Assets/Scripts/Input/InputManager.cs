@@ -195,9 +195,10 @@ public class InputManager : MonoBehaviour
             TargetSelf = _targetSelfAction.WasPerformedThisFrame();
             Sit = _sitAction.WasPerformedThisFrame();
 
-            OpenCharacerStatus = _characterStatusAction.WasPerformedThisFrame();
+            OpenCharacerStatus = _characterStatusAction.WasPerformedThisFrame() ||
+                                 (Keyboard.current != null && Keyboard.current.cKey.wasPressedThisFrame && (Keyboard.current.altKey.isPressed || !Keyboard.current.ctrlKey.isPressed));
             OpenInventory = _inventoryAction.WasPerformedThisFrame() ||
-                            (Keyboard.current != null && (Keyboard.current.iKey.wasPressedThisFrame || Keyboard.current.vKey.wasPressedThisFrame));
+                            (Keyboard.current != null && (Keyboard.current.iKey.wasPressedThisFrame || Keyboard.current.vKey.wasPressedThisFrame || Keyboard.current.tabKey.wasPressedThisFrame));
             OpenSystemMenu = _systemMenuAction.WasPerformedThisFrame();
             OpenActions = _actionsAction.WasPerformedThisFrame();
             OpenSkills = Keyboard.current != null && Keyboard.current.kKey.wasPressedThisFrame;

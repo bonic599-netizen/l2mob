@@ -160,6 +160,11 @@ public class L2GameUI : L2UI
             L2InputAmountWindow.Instance.AddWindow(_popupVisualContainer);
             L2InputAmountWindow.Instance.HideWindow(true);
         }
+        if (MapWindow.Instance != null)
+        {
+            MapWindow.Instance.AddWindow(_rootVisualContainer);
+            MapWindow.Instance.HideWindow(true);
+        }
     }
 
     public void EnableMouse()
@@ -251,7 +256,11 @@ public class L2GameUI : L2UI
 
         if (InputManager.Instance.OpenMap)
         {
-            if (World.Instance != null)
+            if (MapWindow.Instance != null)
+            {
+                MapWindow.Instance.ToggleHideWindow();
+            }
+            else if (World.Instance != null)
             {
                 World.Instance.ToggleWorldMap();
             }

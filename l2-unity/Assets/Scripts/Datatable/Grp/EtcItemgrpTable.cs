@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -19,7 +19,17 @@ public class EtcItemgrpTable
     }
 
     private Dictionary<int, EtcItemgrp> _etcItemGrps;
-    public Dictionary<int, EtcItemgrp> EtcItemGrps { get { return _etcItemGrps; } }
+    public Dictionary<int, EtcItemgrp> EtcItemGrps
+    {
+        get
+        {
+            if (_etcItemGrps == null)
+            {
+                ReadEtcItemgrpDat();
+            }
+            return _etcItemGrps;
+        }
+    }
 
     public void Initialize()
     {
@@ -28,9 +38,7 @@ public class EtcItemgrpTable
 
     public void ClearTable()
     {
-        _etcItemGrps.Clear();
-        _etcItemGrps = null;
-        _instance = null;
+        // Retain etcitemgrps in memory
     }
 
     private void ReadEtcItemgrpDat()

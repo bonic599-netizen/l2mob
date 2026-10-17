@@ -181,11 +181,12 @@ public class WorldSpawner : MonoBehaviour
         var entity1 = await entity1Task;
         var entity2 = await entity2Task;
 
-        if (entity1 != null && entity2 != null)
+        if (entity1 != null)
         {
+            var finalTarget = entity2 != null ? entity2 : entity1;
             try
             {
-                _eventProcessor.QueueEvent(() => action(entity1, entity2));
+                _eventProcessor.QueueEvent(() => action(entity1, finalTarget));
             }
             catch (Exception ex)
             {

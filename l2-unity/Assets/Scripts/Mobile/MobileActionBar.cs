@@ -142,4 +142,18 @@ public class MobileActionBar : MonoBehaviour
         if (SystemMenuWindow.Instance != null)
             SystemMenuWindow.Instance.ToggleHideWindow();
     }
+
+    public void ToggleMap()
+    {
+        if (MapWindow.Instance != null)
+            MapWindow.Instance.ToggleHideWindow();
+        else if (World.Instance != null)
+            World.Instance.ToggleWorldMap();
+    }
+
+    public void ToggleSkills()
+    {
+        if (SkillWindow.Instance != null)
+            SkillWindow.Instance.ToggleHideWindow();
+    }
 }

@@ -133,7 +133,7 @@ public class SkillbarSlot : SkillSlot
 
         _skillInfo = PlayerSkill.Instance.GetSkillInfo(skillId);
 
-        if (_skillInfo.IsSkillOnCooldown) //TODO: FIX CAN CRASH HERE
+        if (_skillInfo != null && _skillInfo.IsSkillOnCooldown)
         {
             // CooldownStartTime = skillInfo.CooldownStartTime;
             // CooldownEndTime = skillInfo.CooldownEndTime;
@@ -178,8 +178,8 @@ public class SkillbarSlot : SkillSlot
         {
             if (_shortcut.Type == Shortcut.TYPE_ITEM)
             {
-                ItemName itemName = ((InventorySlot)_innerSlot).ItemName;
-                if (itemName.DefaultAction == "action_soulshot" || itemName.DefaultAction == "action_bless_spiritshot" || itemName.DefaultAction == "action_spiritshot")
+                ItemName itemName = ((InventorySlot)_innerSlot)?.ItemName;
+                if (itemName != null && (itemName.DefaultAction == "action_soulshot" || itemName.DefaultAction == "action_bless_spiritshot" || itemName.DefaultAction == "action_spiritshot"))
                 {
                     Debug.LogWarning($"Toggle bar slot {_position}.");
                     PlayerShortcuts.Instance.RequestToggleShortcutItem(itemName.Id, _toggled);

@@ -232,6 +232,13 @@ public class World : MonoBehaviour
 
     public void ToggleWorldMap(int categoryId = 0)
     {
+        if (MapWindow.Instance != null)
+        {
+            MapWindow.Instance.OpenCategory(categoryId);
+            MapWindow.Instance.ToggleHideWindow();
+            return;
+        }
+
         if (NpcHtmlWindow.Instance == null) return;
 
         Vector3 pos = PlayerEntity.Instance != null ? PlayerEntity.Instance.transform.position : _lastServerPlayerPos;

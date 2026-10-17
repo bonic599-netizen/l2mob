@@ -63,7 +63,11 @@ public class MenuWindow : L2Window
         mapBtn.AddManipulator(new ButtonClickSoundManipulator(mapBtn));
         mapBtn.RegisterCallback<ClickEvent>((evt) =>
         {
-            if (World.Instance != null)
+            if (MapWindow.Instance != null)
+            {
+                MapWindow.Instance.ToggleHideWindow();
+            }
+            else if (World.Instance != null)
             {
                 World.Instance.ToggleWorldMap();
             }

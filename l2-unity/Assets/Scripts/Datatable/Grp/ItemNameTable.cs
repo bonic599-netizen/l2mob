@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 
@@ -29,9 +29,7 @@ public class ItemNameTable
 
     public void ClearTable()
     {
-        _itemNames.Clear();
-        _itemNames = null;
-        _instance = null;
+        // Retain item names in memory to support character selection, gear equips, and inventory tooltips
     }
 
     private void ReadItemNameDat()
@@ -107,8 +105,21 @@ public class ItemNameTable
 
     public ItemName GetItemName(int id)
     {
-        ItemName itemName;
-        _itemNames.TryGetValue(id, out itemName);
-        return itemName;
+        if (_itemNames == null)
+        {
+            ReadItemNameDat();
+        }
+
+        if (_itemNames != null && _itemNames.TryGetValue(id, out ItemName itemName) && itemName != null)
+        {
+            return itemName;
+        }
+
+        return new ItemName
+        {
+            Id = id,
+            Name = $"Item #{id}",
+            Description = ""
+        };
     }
 }

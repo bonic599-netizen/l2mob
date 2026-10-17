@@ -46,13 +46,14 @@ public class InventorySlot : L2DraggableSlot
         if (item.ItemData != null)
         {
             _id = item.ItemData.Id;
-            _name = item.ItemData.ItemName.Name;
-            _description = item.ItemData.ItemName.Description;
+            ItemName iname = item.ItemData.ItemName ?? ItemNameTable.Instance.GetItemName(_id) ?? new ItemName { Id = _id, Name = $"Item #{_id}", Description = "" };
+            _name = iname.Name ?? $"Item #{_id}";
+            _description = iname.Description ?? "";
             _icon = item.ItemData.Icon;
             _objectId = item.ObjectId;
             _empty = false;
             _type1 = item.Type1;
-            _assignedItem = item.ItemData.ItemName;
+            _assignedItem = iname;
         }
         else
         {

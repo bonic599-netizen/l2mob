@@ -127,10 +127,10 @@ public class GameManager : MonoBehaviour
         IconTable.Instance.Initialize();
         SkillbarImageTable.Instance.Initialize();
 
-        // Memory cleanup
-        ArmorgrpTable.Instance.ClearTable();
-        EtcItemgrpTable.Instance.ClearTable();
-        ItemNameTable.Instance.ClearTable();
+        // Memory cleanup (keep essential datatables cached for character selection, gear synthesis, and inventory)
+        // ArmorgrpTable.Instance.ClearTable();
+        // EtcItemgrpTable.Instance.ClearTable();
+        // ItemNameTable.Instance.ClearTable();
         // SkillgrpTable.Instance.ClearTable();
         // SkillNameTable.Instance.ClearTable();
     }
