@@ -11,8 +11,6 @@ namespace L2Mobile.Editor
         static MetaUpgradeHelper()
         {
             EditorApplication.delayCall += CheckAndUpgrade;
-            EditorApplication.delayCall += FixMissingPrefabsInActiveScene;
-            UnityEditor.SceneManagement.EditorSceneManager.sceneOpened += (s, m) => FixMissingPrefabsInActiveScene();
         }
 
         private static void CheckAndUpgrade()
@@ -33,44 +31,6 @@ namespace L2Mobile.Editor
             AssetDatabase.ForceReserializeAssets();
             AssetDatabase.SaveAssets();
             Debug.Log("[MetaUpgradeHelper] All project meta files reserialized and saved.");
-        }
-
-        [MenuItem("Tools/Fix Missing Prefabs in Active Scene")]
-        public static void FixMissingPrefabsInActiveScene()
-        {
-            var scene = UnityEditor.SceneManagement.EditorSceneManager.GetActiveScene();
-            if (!scene.IsValid() || !scene.isLoaded) return;
-
-            int count = 0;
-            var roots = scene.GetRootGameObjects();
-            foreach (var root in roots)
-            {
-                var transforms = root.GetComponentsInChildren<Transform>(true);
-                foreach (var t in transforms)
-                {
-                    if (t == null) continue;
-                    if (PrefabUtility.IsPartOfMissingPrefab(t.gameObject))
-                    {
-                        var nearest = PrefabUtility.GetNearestPrefabInstanceRoot(t.gameObject);
-                        if (nearest != null)
-                        {
-                            PrefabUtility.UnpackPrefabInstance(nearest, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
-                            count++;
-                        }
-                    }
-                }
-            }
-
-            if (count > 0)
-            {
-                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(scene);
-                UnityEditor.SceneManagement.EditorSceneManager.SaveScene(scene);
-                Debug.Log($"[MetaUpgradeHelper] Successfully unpacked {count} missing prefab instance(s) in '{scene.name}' and saved the scene.");
-            }
-            else
-            {
-                Debug.Log($"[MetaUpgradeHelper] No missing prefab instances found in '{scene.name}'.");
-            }
         }
     }
 }
