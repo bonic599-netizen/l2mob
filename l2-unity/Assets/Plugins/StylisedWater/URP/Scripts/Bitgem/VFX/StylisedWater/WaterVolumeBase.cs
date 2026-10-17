@@ -1,4 +1,4 @@
-﻿#region Using statements
+#region Using statements
 
 using Bitgem.Core;
 using System.Collections;
@@ -80,11 +80,19 @@ namespace Bitgem.VFX.StylisedWater
             if (mesh == null)
             {
                 mesh = meshFilter.sharedMesh;
+#if UNITY_6000_0_OR_NEWER
+                if (mesh == null || mesh.name != "WaterVolume-" + gameObject.GetEntityId())
+                {
+                    mesh = new UnityEngine.Mesh();
+                    mesh.name = "WaterVolume-" + gameObject.GetEntityId();
+                }
+#else
                 if (mesh == null || mesh.name != "WaterVolume-" + gameObject.GetInstanceID())
                 {
                     mesh = new UnityEngine.Mesh();
                     mesh.name = "WaterVolume-" + gameObject.GetInstanceID();
                 }
+#endif
             }
 
             // apply the mesh to the filter

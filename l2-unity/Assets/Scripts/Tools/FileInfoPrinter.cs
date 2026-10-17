@@ -14,7 +14,11 @@ public class FileInfoPrinter {
 
             if(AssetDatabase.TryGetGUIDAndLocalFileIdentifier(obj, out guid, out file)) {
                 stringBuilder.AppendFormat("Asset: " + obj.name +
+#if UNITY_6000_0_OR_NEWER
+                    "\n  Entity ID: " + obj.GetEntityId() +
+#else
                     "\n  Instance ID: " + obj.GetInstanceID() +
+#endif
                     "\n  GUID: " + guid +
                     "\n  File ID: " + file);
             }
