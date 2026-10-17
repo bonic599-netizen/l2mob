@@ -327,7 +327,15 @@ public class InventoryWindow : L2PopupWindow
     {
         if (_isWindowHidden)
         {
-            GameClient.Instance.ClientPacketHandler.SendRequestOpenInventory();
+            if (PlayerInventory.Instance != null && PlayerInventory.Instance.Items != null)
+            {
+                UpdateItemList(PlayerInventory.Instance.Items);
+            }
+            ShowWindow();
+            if (GameClient.Instance != null && GameClient.Instance.ClientPacketHandler != null)
+            {
+                GameClient.Instance.ClientPacketHandler.SendRequestOpenInventory();
+            }
         }
         else
         {

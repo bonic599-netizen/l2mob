@@ -10,14 +10,30 @@ public class InventoryUpdatePacket : AbstractItemPacket
 
     public override void Parse()
     {
-        int itemListSize = ReadH();
-
-        _items = new ItemInstance[itemListSize];
-        for (int i = 0; i < itemListSize; i++)
+        try
         {
-            int lastChange = ReadH();
-            _items[i] = ReadItem();
-            _items[i].LastChange = lastChange;
+            int itemListSize = ReadH();
+
+            var list = new System.Collections.Generic.List<ItemInstance>(itemListSize);
+            var usedPaperdoll = new System.Collections.Generic.HashSet<Paperdoll>();
+            int invSlot = 0;
+            for (int i = 0; i < itemListSize; i++)
+            {
+                int lastChange = ReadH();
+                ItemInstance item = ReadItem(invSlot, usedPaperdoll);
+                item.LastChange = lastChange;
+                if (!item.Equipped)
+                {
+                    invSlot++;
+                }
+                list.Add(item);
+            }
+            _items = list.ToArray();
+        }
+        catch (System.Exception e)
+        {
+            UnityEngine.Debug.LogError($"[InventoryUpdatePacket] Parse error: {e}");
+            if (_items == null) _items = System.Array.Empty<ItemInstance>();
         }
     }
 }

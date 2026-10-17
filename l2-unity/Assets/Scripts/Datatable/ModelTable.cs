@@ -493,7 +493,17 @@ public class ModelTable
     // -------
     // Getters
     // -------
-    public L2ArmorPiece GetArmorPiece(Armor armor, CharacterModelType raceId)
+    public bool HasLoadedArmorModel(Armor armor)
+    {
+        if (armor == null || armor.Armorgrp == null || armor.Armorgrp.Model == null || armor.Armorgrp.Texture == null || _armors == null)
+            return false;
+        string m = armor.Armorgrp.Model[(byte)CharacterModelType.MFighter];
+        string t = armor.Armorgrp.Texture[(byte)CharacterModelType.MFighter];
+        if (string.IsNullOrEmpty(m) || string.IsNullOrEmpty(t)) return false;
+        return _armors.TryGetValue(m, out L2Armor l2a) && l2a != null && l2a.baseModel != null && l2a.materials != null && l2a.materials.ContainsKey(t);
+    }
+
+    public L2ArmorPiece GetArmorPiece(Armor armor, CharacterModelType raceId, ItemSlot fallbackSlot = ItemSlot.SLOT_NONE)
     {
         if (armor == null)
         {
@@ -501,43 +511,63 @@ public class ModelTable
             return null;
         }
 
+        L2ArmorPiece piece = TryGetExactArmorPiece(armor, raceId);
+        if (piece != null)
+        {
+            return piece;
+        }
+
+        // Fallback: find a loaded armor piece for this race and slot so custom/missing armors still render visibly
+        ItemSlot targetSlot = fallbackSlot != ItemSlot.SLOT_NONE ? fallbackSlot : armor.Armorgrp.BodyPart;
+        foreach (var kvp in ItemTable.Instance.Armors)
+        {
+            if (kvp.Key != ItemTable.NAKED_CHEST && kvp.Key != ItemTable.NAKED_LEGS && kvp.Key != ItemTable.NAKED_GLOVES && kvp.Key != ItemTable.NAKED_BOOTS
+                && kvp.Value != null && kvp.Value.Armorgrp != null && kvp.Value.Armorgrp.BodyPart == targetSlot)
+            {
+                piece = TryGetExactArmorPiece(kvp.Value, raceId);
+                if (piece != null)
+                {
+                    return piece;
+                }
+            }
+        }
+
+        // Final fallback to default naked piece for that slot so body part is never invisible
+        int nakedId = targetSlot == ItemSlot.SLOT_LEGS ? ItemTable.NAKED_LEGS :
+                      targetSlot == ItemSlot.SLOT_GLOVES ? ItemTable.NAKED_GLOVES :
+                      targetSlot == ItemSlot.SLOT_FEET ? ItemTable.NAKED_BOOTS : ItemTable.NAKED_CHEST;
+        if (ItemTable.Instance.Armors.TryGetValue(nakedId, out Armor nakedArmor))
+        {
+            return TryGetExactArmorPiece(nakedArmor, raceId);
+        }
+
+        return null;
+    }
+
+    private L2ArmorPiece TryGetExactArmorPiece(Armor armor, CharacterModelType raceId)
+    {
+        if (armor?.Armorgrp?.Model == null || armor.Armorgrp.Texture == null) return null;
+        if ((byte)raceId >= armor.Armorgrp.Model.Length || (byte)raceId >= armor.Armorgrp.Texture.Length) return null;
+
         string model = armor.Armorgrp.Model[(byte)raceId];
-        if (!_armors.ContainsKey(model))
+        string tex = armor.Armorgrp.Texture[(byte)raceId];
+        if (string.IsNullOrEmpty(model) || string.IsNullOrEmpty(tex)) return null;
+
+        if (!_armors.TryGetValue(model, out L2Armor l2Armor) || l2Armor == null || l2Armor.baseModel == null || l2Armor.materials == null)
         {
-            Debug.LogWarning($"Can't find armor model {model} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
             return null;
         }
 
-        GameObject baseModel = _armors[model].baseModel;
-        if (baseModel == null)
+        if (!l2Armor.materials.TryGetValue(tex, out Material material) || material == null)
         {
-            Debug.LogWarning($"Can't find armor model {model} for {raceId} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
-            return null;
+            foreach (var mat in l2Armor.materials.Values)
+            {
+                if (mat != null) { material = mat; break; }
+            }
         }
 
-        if (_armors[model].materials == null)
-        {
-            Debug.LogWarning($"Can't find armor material for {model} and {raceId} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
-            return null;
-        }
-
-        if (armor.Armorgrp.Texture == null || armor.Armorgrp.Texture.Length < RACE_COUNT || armor.Armorgrp.Texture[(byte)raceId] == null)
-        {
-            Debug.LogWarning($"Can't find armor material for {model} and {raceId} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
-            return null;
-        }
-
-        Material material;
-        _armors[model].materials.TryGetValue(armor.Armorgrp.Texture[(byte)raceId], out material);
-
-        if (material == null)
-        {
-            Debug.LogWarning($"Can't find armor material for {model} and {raceId} in ModelTable. Material is {armor.Armorgrp.Texture[(byte)raceId]}.");
-            return null;
-        }
-
-        L2ArmorPiece armorModel = new L2ArmorPiece(baseModel, material);
-        return armorModel;
+        if (material == null) return null;
+        return new L2ArmorPiece(l2Armor.baseModel, material);
     }
 
     public L2ArmorPiece GetArmorPieceByItemId(int itemId, CharacterModelType raceId)
@@ -550,9 +580,10 @@ public class ModelTable
     public GameObject[] GetWeaponsById(int itemId)
     {
         Weapon weapon = ItemTable.Instance.GetWeapon(itemId);
-        if (weapon == null)
+        if (weapon == null || weapon.Weapongrp == null || weapon.Weapongrp.Models == null)
         {
             Debug.LogWarning($"Can't find weapon {itemId} in ItemTable");
+            return null;
         }
 
         GameObject[] models = new GameObject[weapon.Weapongrp.Models.Length];
@@ -560,20 +591,65 @@ public class ModelTable
         for (int i = 0; i < models.Length; i++)
         {
             models[i] = GetWeapon(weapon.Weapongrp.Models[i]);
+            if (models[i] == null)
+            {
+                models[i] = GetFallbackWeaponModel(weapon.Weapongrp.WeaponType);
+            }
         }
 
         return models;
     }
 
+    private GameObject GetFallbackWeaponModel(WeaponType weaponType)
+    {
+        string preferred = "LineageWeapons.sword_of_revolution_m00_wp";
+        switch (weaponType)
+        {
+            case WeaponType.none:
+                preferred = "LineageWeapons.tower_shield_m00_sh";
+                break;
+            case WeaponType.bow:
+                preferred = "LineageWeapons.composition_bow_m00_wp";
+                break;
+            case WeaponType.dagger:
+                preferred = "LineageWeapons.doomed_dagger_m00_wp";
+                break;
+            case WeaponType.blunt:
+            case WeaponType.bigblunt:
+                preferred = "LineageWeapons.ghost_staff_m00_wp";
+                break;
+            case WeaponType.bigword:
+                preferred = "LineageWeapons.zweihander_m00_wp";
+                break;
+            case WeaponType.pole:
+                preferred = "LineageWeapons.lancia_m00_wp";
+                break;
+            case WeaponType.fist:
+                preferred = "LineageWeapons.spike_glove_m00_wp";
+                break;
+        }
+        if (_weapons != null && _weapons.TryGetValue(preferred, out GameObject go) && go != null)
+        {
+            return go;
+        }
+        if (_weapons != null)
+        {
+            foreach (var w in _weapons.Values)
+            {
+                if (w != null) return w;
+            }
+        }
+        return null;
+    }
+
     public GameObject GetWeapon(string model)
     {
-        if (_weapons.TryGetValue(model, out GameObject go))
+        if (model != null && _weapons.TryGetValue(model, out GameObject go))
         {
             return go;
         }
         else
         {
-            Debug.LogWarning($"Can't find weapon model {model} in ModelTable");
             return null;
         }
     }

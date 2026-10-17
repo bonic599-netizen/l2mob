@@ -21,7 +21,7 @@ public class ItemInstance
     public int ItemId { get { return _itemId; } }
     public ItemLocation Location { get { return _location; } }
     public bool Equipped { get { return _equipped; } }
-    public int Slot { get { return _slot; } }
+    public int Slot { get { return _slot; } set { _slot = value; } }
     public int Count { get { return _count; } }
     public ItemType1 Type1 { get { return _type1; } }
     public ItemType2 Type2 { get { return _type2; } }
@@ -56,7 +56,7 @@ public class ItemInstance
             }
             else
             {
-                _itemData = ItemTable.Instance.GetArmor(_itemId);
+                _itemData = ItemTable.Instance.GetArmor(_itemId, bodyPart);
             }
         }
         else
@@ -75,10 +75,13 @@ public class ItemInstance
         _remainingTime = newItem.RemainingTime;
         _enchantLevel = newItem.EnchantLevel;
 
-        if (_equipped == false && newItem.Equipped == true
-        || _equipped == true && newItem.Equipped == false)
+        if ((_equipped == false && newItem.Equipped == true)
+        || (_equipped == true && newItem.Equipped == false))
         {
-            AudioManager.Instance.PlayEquipSound(_itemData.Itemgrp.EquipSound);
+            if (_itemData != null && _itemData.Itemgrp != null && !string.IsNullOrEmpty(_itemData.Itemgrp.EquipSound))
+            {
+                AudioManager.Instance.PlayEquipSound(_itemData.Itemgrp.EquipSound);
+            }
         }
 
         _equipped = newItem.Equipped;

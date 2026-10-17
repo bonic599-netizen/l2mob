@@ -54,6 +54,10 @@ public class UserSpawner : EntitySpawnStrategy<PlayerAppearance, Stats, PlayerSt
     protected override void UpdateEntitySync(Entity entity, NetworkIdentity identity,
         PlayerStatus status, Stats stats, PlayerAppearance appearance, EntityActionInfo actionInfo)
     {
+        identity.SetPosY(World.Instance.GetGroundHeight(identity.Position));
+        if (stats.MaxHp <= 0) stats.MaxHp = 100;
+        if (!actionInfo.AlikeDead && status.Hp <= 0) status.Hp = stats.MaxHp;
+
         entity.Identity.UpdateIdentity(identity);
         ((PlayerStatus)entity.Status).UpdateStatus(status);
 

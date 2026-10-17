@@ -61,6 +61,13 @@ public class MenuWindow : L2Window
 
         var mapBtn = _windowEle.Q<Button>("MapButton");
         mapBtn.AddManipulator(new ButtonClickSoundManipulator(mapBtn));
+        mapBtn.RegisterCallback<ClickEvent>((evt) =>
+        {
+            if (World.Instance != null)
+            {
+                World.Instance.ToggleWorldMap();
+            }
+        });
 
         var sysBtn = _windowEle.Q<Button>("SystemMenuButton");
         sysBtn.AddManipulator(new ButtonClickSoundManipulator(sysBtn));

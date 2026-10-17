@@ -126,37 +126,49 @@ public class SkillTable
 
             Dictionary<int, SkillNameData> skillname = SkillNameTable.Instance.GetNames(kvp.Key);
 
-            SkillNameData[] skillNameArray = new SkillNameData[skillname.Keys.Count];
-            int arrIx = 0;
-            foreach (var s in skillname)
+            SkillNameData[] skillNameArray = skillname != null ? new SkillNameData[skillname.Keys.Count] : new SkillNameData[] { SkillNameTable.Instance.GetName(kvp.Key, 1) };
+            if (skillname != null)
             {
-                skillNameArray[arrIx] = s.Value;
+                int arrIx = 0;
+                foreach (var s in skillname)
+                {
+                    skillNameArray[arrIx++] = s.Value;
+                }
             }
 
             Dictionary<int, Skillgrp> skillgrp = SkillgrpTable.Instance.GetSkillgrp(kvp.Key);
 
-            Skillgrp[] skillgrpArray = new Skillgrp[skillgrp.Keys.Count];
-            arrIx = 0;
-            foreach (var s in skillgrp)
+            Skillgrp[] skillgrpArray = skillgrp != null ? new Skillgrp[skillgrp.Keys.Count] : new Skillgrp[] { SkillgrpTable.Instance.GetSkill(kvp.Key, 1) };
+            if (skillgrp != null)
             {
-                skillgrpArray[arrIx] = s.Value;
+                int arrIx = 0;
+                foreach (var s in skillgrp)
+                {
+                    skillgrpArray[arrIx++] = s.Value;
+                }
             }
 
             SkillSoundgrp skillSoundgrp = SkillSoundgrpTable.Instance.GetSkillSoundGrp(kvp.Key);
 
             Skill skill = new Skill(kvp.Key, skillNameArray, skillgrpArray, skillSoundgrp);
             Skills.Add(kvp.Key, skill);
-
-            // Debug.LogWarning($"ID:{skill.SkillNameDatas[0].Id} Name:{skill.SkillNameDatas[0].Name} Effect:{skill.EffectId}");
         }
     }
 
 
     public Skill GetSkill(int id)
     {
-        Skill skill;
-        Skills.TryGetValue(id, out skill);
+        if (Skills == null) CacheSkills();
+        if (Skills.TryGetValue(id, out Skill skill) && skill != null)
+        {
+            return skill;
+        }
 
+        SkillNameData[] names = new SkillNameData[] { SkillNameTable.Instance.GetName(id, 1) };
+        Skillgrp[] grps = new Skillgrp[] { SkillgrpTable.Instance.GetSkill(id, 1) };
+        SkillSoundgrp sound = SkillSoundgrpTable.Instance.GetSkillSoundGrp(id);
+        skill = new Skill(id, names, grps, sound);
+        Skills[id] = skill;
         return skill;
     }
 }

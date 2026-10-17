@@ -15,15 +15,29 @@ public class InventoryItemListPacket : AbstractItemPacket
 
     public override void Parse()
     {
-        // writeB((byte) (showWindow ? 0x01 : 0x00));
-        // writeI(items.size());
-        _openWindow = ReadH() == 1;
-        int itemListSize = ReadH();
-
-        _items = new ItemInstance[itemListSize];
-        for (int i = 0; i < itemListSize; i++)
+        try
         {
-            _items[i] = ReadItem();
+            _openWindow = ReadH() == 1;
+            int itemListSize = ReadH();
+
+            var list = new System.Collections.Generic.List<ItemInstance>(itemListSize);
+            var usedPaperdoll = new System.Collections.Generic.HashSet<Paperdoll>();
+            int invSlot = 0;
+            for (int i = 0; i < itemListSize; i++)
+            {
+                ItemInstance item = ReadItem(invSlot, usedPaperdoll);
+                if (!item.Equipped)
+                {
+                    invSlot++;
+                }
+                list.Add(item);
+            }
+            _items = list.ToArray();
+        }
+        catch (Exception e)
+        {
+            UnityEngine.Debug.LogError($"[InventoryItemListPacket] Parse error: {e}");
+            if (_items == null) _items = Array.Empty<ItemInstance>();
         }
     }
 }

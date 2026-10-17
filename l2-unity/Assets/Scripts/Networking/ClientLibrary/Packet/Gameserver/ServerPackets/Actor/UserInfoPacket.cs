@@ -140,7 +140,7 @@ public class UserInfoPacket : ServerPacket
             Identity.Heading = ReadI();
 
             ReadI(); //Pledge class
-            ReadI(); //Pledge type
+            ReadH(); //Pledge type
 
             Appearance.ServerTitleColor = ReadI(); //Title Color
 
@@ -152,10 +152,9 @@ public class UserInfoPacket : ServerPacket
             Stats.WalkSpeed = (int)(Stats.MoveSpeedMultiplier > 0 ? Stats.WalkSpeed * Stats.MoveSpeedMultiplier : Stats.WalkSpeed);
             // Stats.PAtkSpd = (int)(Stats.AttackSpeedMultiplier > 0 ? Stats.PAtkSpd * Stats.AttackSpeedMultiplier : Stats.PAtkSpd);
 
-            int rawRange = ReadI();
-            Stats.AttackRange = (rawRange > 0 && rawRange < 5000 ? rawRange : 40f) / 52.5f;
-
-            Debug.LogWarning(ToString());
+            Stats.AttackRange = 40f / 52.5f;
+            Stats.MaxHp = 100;
+            Status.Hp = EntityActionInfo.AlikeDead ? 0 : 100;
         }
         catch (Exception e)
         {

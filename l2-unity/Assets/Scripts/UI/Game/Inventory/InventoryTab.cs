@@ -35,11 +35,19 @@ public class InventoryTab : L2Tab
             {
                 if (_filteredCategories == null || _filteredCategories.Count == 0)
                 {
-                    ((InventorySlot)_slotContainer.Slots[item.Slot]).AssignItem(item);
+                    int targetSlot = (item.Slot >= 0 && item.Slot < _slotContainer.Slots.Length) ? item.Slot : _itemCount;
+                    _itemCount++;
+                    if (targetSlot >= 0 && targetSlot < _slotContainer.Slots.Length)
+                    {
+                        ((InventorySlot)_slotContainer.Slots[targetSlot]).AssignItem(item);
+                    }
                 }
                 else if (_filteredCategories.Contains(item.Type1))
                 {
-                    ((InventorySlot)_slotContainer.Slots[_itemCount++]).AssignItem(item);
+                    if (_itemCount < _slotContainer.Slots.Length)
+                    {
+                        ((InventorySlot)_slotContainer.Slots[_itemCount++]).AssignItem(item);
+                    }
                 }
             }
         });

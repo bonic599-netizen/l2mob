@@ -238,8 +238,10 @@ public class SkillbarWindow : L2PopupWindow
 
     public IEnumerator UpdateAllShortcuts(List<Shortcut> shortcuts)
     {
-        while (!PlayerInventory.Instance.Initialized)
+        int waitTicks = 0;
+        while (PlayerInventory.Instance != null && !PlayerInventory.Instance.Initialized && waitTicks < 15)
         {
+            waitTicks++;
             yield return new WaitForSeconds(0.1f);
         }
 

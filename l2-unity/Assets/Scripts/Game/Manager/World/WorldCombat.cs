@@ -174,6 +174,11 @@ public class WorldCombat : MonoBehaviour
             OnSkillAllowed(hitTime);
         }
 
+        if (skill == null || skill.Skillgrps == null || skill.Skillgrps.Length == 0 || skill.Skillgrps[0] == null)
+        {
+            return;
+        }
+
         // Spawn particle
         PooledEffect[] castEffects = ParticleManager.Instance.SpawnCastParticles(entity, skill, hitTime);
 
@@ -195,6 +200,8 @@ public class WorldCombat : MonoBehaviour
     // Shoot skill projectile
     public void EntityShootSkill(Entity sender, Entity target, Skill skill, float hitTime)
     {
+        if (skill == null) return;
+
         // Spawn particle
         ParticleManager.Instance.SpawnSkillShotParticle(sender, target, skill, hitTime);
 
@@ -214,9 +221,8 @@ public class WorldCombat : MonoBehaviour
     public void SkillProjectileHitTarget(Entity entity, Entity target, Skill skill)
     {
         // Skill has an explosion action ? (was a projectile) ?
-        if (skill.SkillEffect.ExplosionActions == null || skill.SkillEffect.ExplosionActions.Count == 0)
+        if (skill == null || skill.SkillEffect == null || skill.SkillEffect.ExplosionActions == null || skill.SkillEffect.ExplosionActions.Count == 0)
         {
-            Debug.LogWarning($"Skill {skill.SkillId} doesnt have any explosion action.");
             return;
         }
 

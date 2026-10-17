@@ -165,20 +165,18 @@ public class UserGear : HumanoidGear
 
     public bool IsArmorAlreadyEquipped(int itemId, ItemSlot slot)
     {
-        //Debug.Log($"IsArmorAlreadyEquipped ({itemId},{slot})");
-
         switch (slot)
         {
             case ItemSlot.SLOT_CHEST:
-                return itemId == _torsoMeta.Id;
+                return _torsoMeta != null && itemId == _torsoMeta.Id;
             case ItemSlot.SLOT_FULL_ARMOR:
-                return itemId == _fullarmorMeta.Id;
+                return _fullarmorMeta != null && itemId == _fullarmorMeta.Id;
             case ItemSlot.SLOT_LEGS:
-                return itemId == _legsMeta.Id;
+                return _legsMeta != null && itemId == _legsMeta.Id;
             case ItemSlot.SLOT_GLOVES:
-                return itemId == _glovesMeta.Id;
+                return _glovesMeta != null && itemId == _glovesMeta.Id;
             case ItemSlot.SLOT_FEET:
-                return itemId == _bootsMeta.Id;
+                return _bootsMeta != null && itemId == _bootsMeta.Id;
         }
 
         return true;
@@ -228,18 +226,17 @@ public class UserGear : HumanoidGear
     {
         if (IsArmorAlreadyEquipped(itemId, slot))
         {
-            Debug.Log($"Item {itemId} is already equipped in slot {slot}.");
             return;
         }
 
-        Armor armor = ItemTable.Instance.GetArmor(itemId);
+        Armor armor = ItemTable.Instance.GetArmor(itemId, slot);
         if (armor == null)
         {
             Debug.LogWarning($"Can't find armor {itemId} in ItemTable");
             return;
         }
 
-        ModelTable.L2ArmorPiece armorPiece = ModelTable.Instance.GetArmorPiece(armor, _referenceHolder.Entity.RaceId);
+        ModelTable.L2ArmorPiece armorPiece = ModelTable.Instance.GetArmorPiece(armor, _referenceHolder.Entity.RaceId, slot);
         if (armorPiece == null)
         {
             Debug.LogWarning($"Can't find armor {itemId} for race {_referenceHolder.Entity.RaceId} in slot {slot} in ModelTable");

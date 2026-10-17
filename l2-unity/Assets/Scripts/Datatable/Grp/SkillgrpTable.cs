@@ -41,18 +41,51 @@ public class SkillgrpTable
 
     public Skillgrp GetSkill(int id, int level)
     {
-        _skills.TryGetValue(id, out Dictionary<int, Skillgrp> skillLevel);
+        if (_skills == null) _skills = new Dictionary<int, Dictionary<int, Skillgrp>>();
 
-        if (skillLevel == null) return null;
+        if (_skills.TryGetValue(id, out Dictionary<int, Skillgrp> skillLevel) && skillLevel != null)
+        {
+            if (skillLevel.TryGetValue(level, out Skillgrp skillgrp) && skillgrp != null)
+            {
+                return skillgrp;
+            }
+            foreach (var kvp in skillLevel)
+            {
+                if (kvp.Value != null) return kvp.Value;
+            }
+        }
 
-        skillLevel.TryGetValue(level, out Skillgrp skillgrp);
-
-        return skillgrp;
+        Skillgrp fallback = new Skillgrp
+        {
+            Id = id,
+            Level = level > 0 ? level : 1,
+            SubLevel = 0,
+            IconType = SkillType.Physical,
+            OperateType = SkillOperateType.Damage,
+            MpConsume = 10,
+            CastRange = 600,
+            HitTime = 1.5f,
+            CoolTime = 0.2f,
+            ReuseDelay = 2.0f,
+            IsMagic = SkillMagicType.None,
+            CastAnimation = SkillCastAnimation.CastShort,
+            ThrowAnimation = SkillThrowAnimation.MagicNoTarget,
+            SkillVisualEffect = -1,
+            Icon = "icon.skill0000",
+            IconPanel = ""
+        };
+        TryAdd(fallback);
+        return fallback;
     }
 
     public Dictionary<int, Skillgrp> GetSkillgrp(int id)
     {
-        _skills.TryGetValue(id, out Dictionary<int, Skillgrp> skillLevel);
+        if (_skills == null) _skills = new Dictionary<int, Dictionary<int, Skillgrp>>();
+        if (!_skills.TryGetValue(id, out Dictionary<int, Skillgrp> skillLevel) || skillLevel == null || skillLevel.Count == 0)
+        {
+            GetSkill(id, 1);
+            _skills.TryGetValue(id, out skillLevel);
+        }
 
         return skillLevel;
     }

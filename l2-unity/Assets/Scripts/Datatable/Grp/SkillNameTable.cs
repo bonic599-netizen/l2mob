@@ -37,18 +37,41 @@ public class SkillNameTable
 
     public SkillNameData GetName(int id, int level)
     {
-        _names.TryGetValue(id, out Dictionary<int, SkillNameData> skillLevel);
+        if (_names == null) _names = new Dictionary<int, Dictionary<int, SkillNameData>>();
 
-        if (skillLevel == null) return null;
+        if (_names.TryGetValue(id, out Dictionary<int, SkillNameData> skillLevel) && skillLevel != null)
+        {
+            if (skillLevel.TryGetValue(level, out SkillNameData skillName) && skillName != null)
+            {
+                return skillName;
+            }
+            foreach (var kvp in skillLevel)
+            {
+                if (kvp.Value != null) return kvp.Value;
+            }
+        }
 
-        skillLevel.TryGetValue(level, out SkillNameData skillName);
-
-        return skillName;
+        SkillNameData fallback = new SkillNameData
+        {
+            Id = id,
+            Level = level > 0 ? level : 1,
+            SubLevel = 0,
+            Name = $"Skill #{id}",
+            Desc = $"Hellsing Skill #{id} (Lv. {level})",
+            DescParams = Array.Empty<string>()
+        };
+        TryAdd(fallback);
+        return fallback;
     }
 
     public Dictionary<int, SkillNameData> GetNames(int id)
     {
-        _names.TryGetValue(id, out Dictionary<int, SkillNameData> skillLevel);
+        if (_names == null) _names = new Dictionary<int, Dictionary<int, SkillNameData>>();
+        if (!_names.TryGetValue(id, out Dictionary<int, SkillNameData> skillLevel) || skillLevel == null || skillLevel.Count == 0)
+        {
+            GetName(id, 1);
+            _names.TryGetValue(id, out skillLevel);
+        }
 
         return skillLevel;
     }

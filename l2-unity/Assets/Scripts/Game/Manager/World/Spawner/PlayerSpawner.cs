@@ -11,6 +11,7 @@ public class PlayerSpawner : EntitySpawnStrategy<PlayerAppearance, PlayerStats, 
     protected override void SpawnEntity(NetworkIdentity identity, PlayerStatus status,
         PlayerStats stats, PlayerAppearance appearance, EntityActionInfo actionInfo)
     {
+        World.Instance.SetPlayerGroundAnchor(identity.Position);
         identity.SetPosY(World.Instance.GetGroundHeight(identity.Position));
         identity.EntityType = EntityType.Player;
 
@@ -56,8 +57,26 @@ public class PlayerSpawner : EntitySpawnStrategy<PlayerAppearance, PlayerStats, 
     protected override void UpdateEntityAsync(NetworkIdentity identity, PlayerStatus status, PlayerStats stats,
     PlayerAppearance appearance, EntityActionInfo actionInfo)
     {
+        World.Instance.SetPlayerGroundAnchor(identity.Position);
+        identity.SetPosY(World.Instance.GetGroundHeight(identity.Position));
+
+        if (stats.MaxHp <= 0) stats.MaxHp = Mathf.Max(status.Hp, 100);
+        if (!actionInfo.AlikeDead && status.Hp <= 0) status.Hp = stats.MaxHp;
+
         PlayerEntity.Instance.Identity.UpdateIdentity(identity);
         ((PlayerStatus)PlayerEntity.Instance.Status).UpdateStatus(status);
+
+        if (Vector3.Distance(PlayerEntity.Instance.transform.position, identity.Position) > 1.5f)
+        {
+            if (PlayerTransformReceive.Instance != null)
+            {
+                PlayerTransformReceive.Instance.SetNewPosition(identity.Position);
+            }
+            else
+            {
+                PlayerEntity.Instance.transform.position = identity.Position;
+            }
+        }
 
         UpdateStatsAndAppearance(PlayerEntity.Instance, stats, appearance, actionInfo);
 

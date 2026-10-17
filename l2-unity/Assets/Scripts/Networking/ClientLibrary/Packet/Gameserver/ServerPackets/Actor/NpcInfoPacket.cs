@@ -88,12 +88,10 @@ public class NpcInfoPacket : ServerPacket
             Stats.RunSpeed = (int)(Stats.MoveSpeedMultiplier > 0 ? Stats.RunSpeed * Stats.MoveSpeedMultiplier : Stats.RunSpeed);
             Stats.WalkSpeed = (int)(Stats.MoveSpeedMultiplier > 0 ? Stats.WalkSpeed * Stats.MoveSpeedMultiplier : Stats.WalkSpeed);
 
-            int rawRange = ReadI();
-            Stats.AttackRange = (rawRange > 0 && rawRange < 5000 ? rawRange : 40f) / 52.5f;
-            int maxHp = ReadI();
-            Stats.MaxHp = maxHp > 0 ? maxHp : 100;
-            int lvl = ReadI();
-            Stats.Level = lvl > 0 ? lvl : 1;
+            Stats.AttackRange = 40f / 52.5f;
+            Stats.MaxHp = 100;
+            Stats.Level = 1;
+            Status.Hp = EntityActionInfo.AlikeDead ? 0 : 100;
 
             // Debug.LogWarning(ToString());
         }

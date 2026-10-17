@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using System;
 
@@ -44,7 +44,14 @@ public class EventProcessor : MonoBehaviour
         {
             Action e = m_executingEvents[0];
             m_executingEvents.RemoveAt(0);
-            e();
+            try
+            {
+                e?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[EventProcessor] Error executing queued event: {ex}");
+            }
         }
     }
 

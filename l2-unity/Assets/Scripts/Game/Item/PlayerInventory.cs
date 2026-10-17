@@ -72,14 +72,29 @@ public class PlayerInventory : MonoBehaviour
         Initialized = true;
     }
 
+    private int GetFirstFreeInventorySlot()
+    {
+        for (int s = 0; s < InventorySize; s++)
+        {
+            if (GetItemBySlot(s) == null)
+            {
+                return s;
+            }
+        }
+        return _playerInventory.Count;
+    }
+
     public void UpdateInventory(ItemInstance[] items)
     {
         for (int i = 0; i < items.Length; i++)
         {
-            // Debug.Log(items[i]);
             ItemInstance item = items[i];
             if (item.LastChange == (int)InventoryChange.ADDED)
             {
+                if (!item.Equipped)
+                {
+                    item.Slot = GetFirstFreeInventorySlot();
+                }
                 _playerInventory.Add(item);
             }
             else if (item.LastChange == (int)InventoryChange.MODIFIED)
@@ -87,21 +102,36 @@ public class PlayerInventory : MonoBehaviour
                 ItemInstance oldItem = GetItemByObjectId(item.ObjectId);
                 if (oldItem == null)
                 {
+                    if (!item.Equipped)
+                    {
+                        item.Slot = GetFirstFreeInventorySlot();
+                    }
                     _playerInventory.Add(item);
                 }
                 else
                 {
+                    if (!item.Equipped)
+                    {
+                        item.Slot = oldItem.Equipped ? GetFirstFreeInventorySlot() : oldItem.Slot;
+                    }
                     oldItem.Update(item);
                 }
             }
             else if (item.LastChange == (int)InventoryChange.REMOVED)
             {
                 ItemInstance oldItem = GetItemByObjectId(item.ObjectId);
-                _playerInventory.Remove(oldItem);
+                if (oldItem != null)
+                {
+                    _playerInventory.Remove(oldItem);
+                }
             }
         }
 
-        InventoryWindow.Instance.UpdateItemList(_playerInventory);
+        Initialized = true;
+        if (InventoryWindow.Instance != null)
+        {
+            InventoryWindow.Instance.UpdateItemList(_playerInventory);
+        }
     }
 
     public ItemInstance GetItemByObjectId(int objectId)

@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Animations;
 using UnityEngine.InputSystem;
@@ -73,6 +73,7 @@ public class InputManager : MonoBehaviour
     [field: SerializeField] public bool OpenSystemMenu { get; private set; }
     [field: SerializeField] public bool OpenActions { get; private set; }
     [field: SerializeField] public bool OpenSkills { get; private set; }
+    [field: SerializeField] public bool OpenMap { get; private set; }
     [field: SerializeField] public bool CloseWindow { get; private set; }
     [field: SerializeField] public bool Validate { get; private set; }
 
@@ -195,9 +196,12 @@ public class InputManager : MonoBehaviour
             Sit = _sitAction.WasPerformedThisFrame();
 
             OpenCharacerStatus = _characterStatusAction.WasPerformedThisFrame();
-            OpenInventory = _inventoryAction.WasPerformedThisFrame();
+            OpenInventory = _inventoryAction.WasPerformedThisFrame() ||
+                            (Keyboard.current != null && (Keyboard.current.iKey.wasPressedThisFrame || Keyboard.current.vKey.wasPressedThisFrame));
             OpenSystemMenu = _systemMenuAction.WasPerformedThisFrame();
             OpenActions = _actionsAction.WasPerformedThisFrame();
+            OpenSkills = Keyboard.current != null && Keyboard.current.kKey.wasPressedThisFrame;
+            OpenMap = Keyboard.current != null && Keyboard.current.mKey.wasPressedThisFrame;
 
             for (int skillbar = 0; skillbar < 5; skillbar++)
             {
@@ -210,6 +214,12 @@ public class InputManager : MonoBehaviour
         else
         {
             MoveInput = Vector2.zero;
+            OpenCharacerStatus = false;
+            OpenInventory = false;
+            OpenSystemMenu = false;
+            OpenActions = false;
+            OpenSkills = false;
+            OpenMap = false;
         }
 
         ArrowUp = _arrowUpAction.WasPerformedThisFrame();

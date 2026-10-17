@@ -75,24 +75,26 @@ public class InventoryGearTab : L2Tab
 
         items.ForEach(item =>
         {
-            if (item.Equipped)
+            if (item.Equipped && item.ItemData != null)
             {
                 if (item.BodyPart == ItemSlot.SLOT_LR_HAND && item.Type1 == ItemType1.TYPE1_ITEM_QUESTITEM_ADENA)
                 {
-                    _gearSlots[(Paperdoll)item.Slot].AssignItem(item); // Arrows
+                    if (_gearSlots.TryGetValue((Paperdoll)item.Slot, out var arrowSlot))
+                    {
+                        arrowSlot.AssignItem(item); // Arrows
+                    }
                 }
-                else
-                if (item.Type2 == ItemType2.TYPE2_WEAPON && (((Weapongrp)item.ItemData.Itemgrp).WeaponType == WeaponType.bigblunt
-                || ((Weapongrp)item.ItemData.Itemgrp).WeaponType == WeaponType.bigword
-                || ((Weapongrp)item.ItemData.Itemgrp).WeaponType == WeaponType.dual
-                || ((Weapongrp)item.ItemData.Itemgrp).WeaponType == WeaponType.pole
-                || ((Weapongrp)item.ItemData.Itemgrp).WeaponType == WeaponType.fist))
+                else if (item.Type2 == ItemType2.TYPE2_WEAPON && item.ItemData.Itemgrp is Weapongrp wgrp &&
+                    (wgrp.WeaponType == WeaponType.bigblunt
+                    || wgrp.WeaponType == WeaponType.bigword
+                    || wgrp.WeaponType == WeaponType.dual
+                    || wgrp.WeaponType == WeaponType.pole
+                    || wgrp.WeaponType == WeaponType.fist))
                 {
                     _gearSlots[Paperdoll.RHAND].AssignItem(item);
                     _gearSlots[Paperdoll.LHAND].AssignItem(item);
                 }
-                else
-                if (item.Slot == (int)Paperdoll.CHEST && item.BodyPart == ItemSlot.SLOT_FULL_ARMOR)
+                else if (item.Slot == (int)Paperdoll.CHEST && item.BodyPart == ItemSlot.SLOT_FULL_ARMOR)
                 {
                     _gearSlots[Paperdoll.CHEST].AssignItem(item);
                     _gearSlots[Paperdoll.LEGS].AssignItem(item);
@@ -100,13 +102,9 @@ public class InventoryGearTab : L2Tab
                 else
                 {
                     Paperdoll slot = (Paperdoll)item.Slot;
-                    if (slot != Paperdoll.NULL)
+                    if (slot != Paperdoll.NULL && _gearSlots.TryGetValue(slot, out var gearSlot))
                     {
-                        _gearSlots[slot].AssignItem(item);
-                    }
-                    else
-                    {
-                        Debug.LogError("Can't equip item, assigned slot is " + slot);
+                        gearSlot.AssignItem(item);
                     }
                 }
             }

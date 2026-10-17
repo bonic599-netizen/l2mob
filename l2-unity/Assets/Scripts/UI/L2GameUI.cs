@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static NativeFunctions;
@@ -241,19 +241,19 @@ public class L2GameUI : L2UI
             }
         }
 
-        if (InputManager.Instance.OpenCharacerStatus)
-        {
-            if (CharacterInfoWindow.Instance != null)
-            {
-                CharacterInfoWindow.Instance.ToggleHideWindow();
-            }
-        }
-
         if (InputManager.Instance.OpenSkills)
         {
             if (SkillWindow.Instance != null)
             {
                 SkillWindow.Instance.ToggleHideWindow();
+            }
+        }
+
+        if (InputManager.Instance.OpenMap)
+        {
+            if (World.Instance != null)
+            {
+                World.Instance.ToggleWorldMap();
             }
         }
     }

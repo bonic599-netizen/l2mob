@@ -35,20 +35,28 @@ public class MagicSkillUsePacket : ServerPacket
         _tmpPos.y = ReadI() / 52.5f;
         ObjectPosition = _tmpPos;
 
-        Success = ReadI() == 1;
-        if (Success)
+        try
         {
-            ReadB();
-            ReadB();
+            int count1 = ReadH();
+            for (int i = 0; i < count1; i++)
+            {
+                ReadH();
+            }
+            int count2 = ReadH();
+            for (int i = 0; i < count2; i++)
+            {
+                ReadI();
+                ReadI();
+                ReadI();
+            }
+        }
+        catch
+        {
+            // Ignore optional trailer bytes in Interlude MagicSkillUser (0x48)
         }
 
-        _tmpPos = new Vector3();
-        _tmpPos.z = ReadI() / 52.5f;
-        _tmpPos.x = ReadI() / 52.5f;
-        _tmpPos.y = ReadI() / 52.5f;
-        TargetPosition = _tmpPos;
-
-        Debug.Log(ToString());
+        Success = true;
+        TargetPosition = ObjectPosition;
     }
 
     public override string ToString()

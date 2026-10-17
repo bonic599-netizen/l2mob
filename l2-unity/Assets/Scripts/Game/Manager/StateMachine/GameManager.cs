@@ -116,6 +116,7 @@ public class GameManager : MonoBehaviour
         LogongrpTable.Instance.Initialize();
         SystemMessageTable.Instance.Initialize();
         ChargrpTable.Instance.Initialize();
+        LocationTable.Instance.Initialize();
 
         // Caching
         ItemTable.Instance.CacheItems();

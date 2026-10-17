@@ -44,7 +44,19 @@ public class SceneLoader : MonoBehaviour
                 continue;
             }
 
-            _mapsToLoad.Add(map.name);
+            if (!_mapsToLoad.Contains(map.name))
+            {
+                _mapsToLoad.Add(map.name);
+            }
+        }
+
+        string[] defaultMaps = new string[] { "17_25", "16_24", "16_25", "17_24" };
+        for (int i = 0; i < defaultMaps.Length; i++)
+        {
+            if (!_mapsToLoad.Contains(defaultMaps[i]))
+            {
+                _mapsToLoad.Add(defaultMaps[i]);
+            }
         }
     }
 

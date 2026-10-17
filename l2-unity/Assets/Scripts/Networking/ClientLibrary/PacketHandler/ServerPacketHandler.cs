@@ -54,7 +54,17 @@ public abstract class ServerPacketHandler
 
     public async Task HandlePacketAsync(byte[] data)
     {
-        await Task.Run(() => HandlePacket(data));
+        await Task.Run(() =>
+        {
+            try
+            {
+                HandlePacket(data);
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError($"[ServerPacketHandler] Unhandled exception in HandlePacket: {ex}");
+            }
+        });
     }
 
     public void CancelTokens()

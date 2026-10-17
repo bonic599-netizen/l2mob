@@ -83,9 +83,11 @@ public class NpcSpawner : EntitySpawnStrategy<Appearance, Stats, NpcStatus>
         npcGo.transform.name = npc.Identity.Name;
         npcGo.SetActive(true);
 
+        if (stats.MaxHp <= 0) stats.MaxHp = 100;
+        if (!actionInfo.AlikeDead && status.Hp <= 0) status.Hp = stats.MaxHp;
+
+        npc.Stats = stats;
         npc.Status = status;
-        // npc.Status.Hp = npc.Stats.MaxHp; // TODO: Error?
-        // npc.Running = actionInfo.Running;
 
         npc.ReferenceHolder.NewAnimationController.Initialize();
         npc.ReferenceHolder.Gear.Initialize(npc.Identity.Id);
@@ -129,7 +131,13 @@ public class NpcSpawner : EntitySpawnStrategy<Appearance, Stats, NpcStatus>
         Appearance appearance,
         EntityActionInfo actionInfo)
     {
+        identity.SetPosY(World.Instance.GetGroundHeight(identity.Position));
         entity.Identity.UpdateForNpcs(identity);
+
+        if (entity.Status != null && !actionInfo.AlikeDead && entity.Status.Hp <= 0)
+        {
+            entity.Status.Hp = stats.MaxHp > 0 ? stats.MaxHp : 100;
+        }
 
         var networkTransform = ((NetworkEntityReferenceHolder)entity.ReferenceHolder).NetworkTransformReceive;
         networkTransform.SetNewPosition(identity.Position);

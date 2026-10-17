@@ -64,7 +64,9 @@ public class CharSelectedPacket : ServerPacket
             _info.Stats.Dex = (byte)ReadI();
             _info.Stats.Wit = (byte)ReadI();
 
-            for (int i = 0; i < 34; i++)
+            byte initialClass = _info.Identity.PlayerClass;
+
+            for (int i = 0; i < 32; i++)
             {
                 ReadI();
             }
@@ -73,10 +75,20 @@ public class CharSelectedPacket : ServerPacket
 
             ReadI();
 
-            _info.Identity.PlayerClass = (byte)ReadI();
+            byte parsedClass = (byte)ReadI();
+            _info.Identity.PlayerClass = parsedClass != 0 ? parsedClass : initialClass;
             _info.Identity.IsMage = CharacterClassParser.IsMage((CharacterClass)_info.Identity.PlayerClass);
-            // _info.Identity.Heading = ReadF();
             _info.Identity.Owned = true;
+
+            if (_info.Appearance.CollisionHeight <= 0) _info.Appearance.CollisionHeight = 0.43f;
+            if (_info.Appearance.CollisionRadius <= 0) _info.Appearance.CollisionRadius = 0.15f;
+            if (_info.Stats.RunSpeed <= 0) _info.Stats.RunSpeed = 120;
+            if (_info.Stats.WalkSpeed <= 0) _info.Stats.WalkSpeed = 80;
+            if (_info.Stats.PAtkSpd <= 0) _info.Stats.PAtkSpd = 300;
+            if (_info.Stats.MAtkSpd <= 0) _info.Stats.MAtkSpd = 333;
+            if (_info.Stats.MaxHp <= 0) _info.Stats.MaxHp = Math.Max(_info.Status.Hp, 100);
+            if (_info.Stats.MaxMp <= 0) _info.Stats.MaxMp = Math.Max(_info.Status.Mp, 100);
+            if (_info.Status.Hp <= 0) _info.Status.Hp = _info.Stats.MaxHp;
 
             ReadI();
             ReadI();

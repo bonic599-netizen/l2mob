@@ -1042,6 +1042,12 @@ public class NpcHtmlWindow : L2PopupWindow
         }
         Debug.Log(action);
 
+        if (!string.IsNullOrEmpty(action) && action.StartsWith("hellsing_map_") && World.Instance != null)
+        {
+            World.Instance.HandleMapAction(action);
+            return;
+        }
+
         GameClient.Instance.ClientPacketHandler.RequestBypassToServer(action);
     }
 

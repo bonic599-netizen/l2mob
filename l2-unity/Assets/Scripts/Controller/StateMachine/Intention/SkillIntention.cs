@@ -16,7 +16,7 @@ public class SkillIntention : IntentionBase
             _lastSkillIntention = (SkillInfo)arg0;
             CtrlPressed = InputManager.Instance.Ctrl;
             ShiftPressed = InputManager.Instance.Shift;
-            _lastSkillIntentionGrp = SkillgrpTable.Instance.GetSkillgrp(_lastSkillIntention.Id)?[_lastSkillIntention.Level];
+            _lastSkillIntentionGrp = SkillgrpTable.Instance.GetSkill(_lastSkillIntention.Id, _lastSkillIntention.Level);
         }
 
         if (_lastSkillIntention == null)
@@ -24,11 +24,9 @@ public class SkillIntention : IntentionBase
             return;
         }
 
-        //TODO: Use skill levels skillgrp
-        if (_lastSkillIntentionGrp == null || _lastSkillIntentionGrp.Id != _lastSkillIntention.Id)
+        if (_lastSkillIntentionGrp == null)
         {
-            Debug.LogWarning($"Can't retrieve skillgrp for skill id: {_lastSkillIntentionGrp.Id}.");
-            return;
+            _lastSkillIntentionGrp = SkillgrpTable.Instance.GetSkill(_lastSkillIntention.Id, 1);
         }
 
         if (SkillRequiresTarget()) // target required?
@@ -42,13 +40,15 @@ public class SkillIntention : IntentionBase
                 }
                 else
                 {
-                    Debug.Log("Skill requires a target but no target was selected.");
+                    // Send skill request anyway in case it's a self/aura/toggle skill with positive CastRange in table
+                    _stateMachine.ChangeState(PlayerState.IDLE);
+                    _stateMachine.NotifyEvent(Event.READY_TO_SKILL, _lastSkillIntention);
                     return;
                 }
             }
 
-            // TODO: If buff or heal and require target, if not target selected send skill on self
-            float skillRange = _lastSkillIntentionGrp.CastRange / 52.5f * 0.95f; //5% error margin
+            int rawCastRange = _lastSkillIntentionGrp.CastRange > 0 ? _lastSkillIntentionGrp.CastRange : 60;
+            float skillRange = Mathf.Max(rawCastRange / 52.5f * 0.95f, 1.5f); //5% error margin, min 1.5m
             Entity targetEntity = TargetManager.Instance.Target;
             Vector3 targetPos = targetEntity.transform.position;
 
