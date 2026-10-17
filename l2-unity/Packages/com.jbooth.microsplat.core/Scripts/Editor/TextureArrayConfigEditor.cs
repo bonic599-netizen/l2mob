@@ -1,4 +1,4 @@
-﻿//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
 // MicroSplat
 // Copyright (c) Jason Booth
 //////////////////////////////////////////////////////
@@ -1619,8 +1619,8 @@ namespace JBooth.MicroSplat
             }
 
             var platform = EditorUserBuildSettings.activeBuildTarget;
-            if (platform == BuildTarget.Android || platform == BuildTarget.iOS ||
-                platform == BuildTarget.tvOS)
+            if ((platform == BuildTarget.Android || platform == BuildTarget.iOS ||
+                platform == BuildTarget.tvOS) && SystemInfo.SupportsTextureFormat(TextureFormat.ASTC_6x6))
             {
                 if (q == TextureArrayConfig.CompressionQuality.High)
                 {

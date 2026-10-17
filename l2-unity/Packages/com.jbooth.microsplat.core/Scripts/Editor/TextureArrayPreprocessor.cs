@@ -1,4 +1,4 @@
-﻿//////////////////////////////////////////////////////
+//////////////////////////////////////////////////////
 // MicroSplat
 // Copyright (c) Jason Booth
 //////////////////////////////////////////////////////
@@ -14,6 +14,23 @@ namespace JBooth.MicroSplat
     [InitializeOnLoad]
     public class TextureArrayActiveBuildTargetListener : IActiveBuildTargetChanged
     {
+        static TextureArrayActiveBuildTargetListener()
+        {
+            EditorApplication.delayCall += () =>
+            {
+                var guids = AssetDatabase.FindAssets("t: TextureArrayConfig");
+                foreach (var guid in guids)
+                {
+                    string path = AssetDatabase.GUIDToAssetPath(guid);
+                    var cfg = AssetDatabase.LoadAssetAtPath<TextureArrayConfig>(path);
+                    if (cfg != null && cfg.diffuseArray != null && !SystemInfo.SupportsTextureFormat(cfg.diffuseArray.format))
+                    {
+                        AssetDatabase.ImportAsset(path);
+                    }
+                }
+            };
+        }
+
         public int callbackOrder => 0;
 
         public void OnActiveBuildTargetChanged(BuildTarget previousTarget, BuildTarget newTarget)
