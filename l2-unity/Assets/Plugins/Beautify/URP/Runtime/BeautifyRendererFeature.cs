@@ -425,7 +425,7 @@ namespace Beautify.Universal {
             }
 #endif
 
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2022_1_OR_NEWER && !UNITY_6000_0_OR_NEWER
             public void SetupRenderTargets(ScriptableRenderer renderer) {
                 BeautifyRenderPass.renderer = renderer;
 #if UNITY_2022_2_OR_NEWER
@@ -434,7 +434,7 @@ namespace Beautify.Universal {
                 source = renderer.cameraColorTarget;
 #endif
             }
-#else
+#elif !UNITY_6000_0_OR_NEWER
             public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
                 source = renderer.cameraColorTarget;
             }
@@ -1993,7 +1993,7 @@ namespace Beautify.Universal {
 #endif
 
 
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2022_1_OR_NEWER && !UNITY_6000_0_OR_NEWER
             public void SetupRenderTargets(ScriptableRenderer renderer) {
 #if UNITY_2022_2_OR_NEWER
                 depthRT = renderer.cameraDepthTargetHandle;
@@ -2001,7 +2001,7 @@ namespace Beautify.Universal {
                 depthRT = renderer.cameraDepthTarget;
 #endif
             }
-#else
+#elif !UNITY_6000_0_OR_NEWER
             public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
                 depthRT = renderingData.cameraData.renderer.cameraDepthTarget;
             }
@@ -2128,7 +2128,7 @@ namespace Beautify.Universal {
 #endif
 
 
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2022_1_OR_NEWER && !UNITY_6000_0_OR_NEWER
             public void SetupRenderTargets(ScriptableRenderer renderer) {
 #if UNITY_2022_2_OR_NEWER
                 depthRT = renderer.cameraDepthTargetHandle;
@@ -2136,7 +2136,7 @@ namespace Beautify.Universal {
                 depthRT = renderer.cameraDepthTarget;
 #endif
             }
-#else
+#elif !UNITY_6000_0_OR_NEWER
             public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData) {
                 depthRT = renderingData.cameraData.renderer.cameraDepthTarget;
             }
