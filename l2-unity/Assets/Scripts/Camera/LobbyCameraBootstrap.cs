@@ -1,99 +1,135 @@
 using UnityEngine;
 
 /// <summary>
-/// Ensures that when the scene (e.g. l2_lobby) is played without pre-existing cameras,
-/// the lobby cameras and MainCamera are created automatically.
+/// Ensures that when the scene (e.g. l2_lobby) is played:
+/// 1. Black quad planes (LoginBG, LoginBG2) are deactivated.
+/// 2. Directional sunlight is created if missing.
+/// 3. The lobby cameras and interactive controls are active and ready.
 /// </summary>
 public class LobbyCameraBootstrap : MonoBehaviour
 {
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     public static void InitializeLobbyCamera()
     {
-        if (Camera.main != null)
+        // 1. Deactivate blocking background quads
+        GameObject bg1 = GameObject.Find("LoginBG");
+        if (bg1 != null)
         {
-            return;
+            bg1.SetActive(false);
+            Debug.Log("[LobbyCameraBootstrap] Deactivated LoginBG quad.");
+        }
+        GameObject bg2 = GameObject.Find("LoginBG2");
+        if (bg2 != null)
+        {
+            bg2.SetActive(false);
+            Debug.Log("[LobbyCameraBootstrap] Deactivated LoginBG2 quad.");
         }
 
-        Debug.Log("[LobbyCameraBootstrap] No active MainCamera found. Initializing Lobby cameras...");
+        // 2. Ensure directional sunlight exists
+        if (Object.FindAnyObjectByType<Light>() == null)
+        {
+            GameObject sunGo = new GameObject("Lobby Sun Light");
+            Light sun = sunGo.AddComponent<Light>();
+            sun.type = LightType.Directional;
+            sun.color = new Color(1f, 0.96f, 0.90f);
+            sun.intensity = 1.3f;
+            sun.shadows = LightShadows.Soft;
+            sunGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
+            Debug.Log("[LobbyCameraBootstrap] Created Directional Sun Light.");
+        }
 
-        // Find or create "Cameras" container
+        // 3. Find or create Camera container
         GameObject container = GameObject.Find("Cameras");
         if (container == null)
         {
             container = new GameObject("Cameras");
         }
 
-        // 1. Create Login (Main) Camera
-        GameObject loginCamGo = GameObject.Find("Login");
-        if (loginCamGo == null)
+        Camera activeCam = Camera.main;
+
+        if (activeCam == null)
         {
-            loginCamGo = new GameObject("Login");
-            loginCamGo.transform.SetParent(container.transform);
-        }
+            Debug.Log("[LobbyCameraBootstrap] No active MainCamera found. Initializing Lobby cameras...");
 
-        // Position camera in front of lobby background facing the scene
-        loginCamGo.transform.position = new Vector3(4595.33f, -120f, -172.4f);
-        loginCamGo.transform.rotation = Quaternion.Euler(0f, -140f, 0f);
-
-        Camera cam = loginCamGo.GetComponent<Camera>();
-        if (cam == null)
-        {
-            cam = loginCamGo.AddComponent<Camera>();
-        }
-
-        cam.tag = "MainCamera";
-        cam.fieldOfView = 60f;
-        cam.nearClipPlane = 0.3f;
-        cam.farClipPlane = 20000f;
-        cam.clearFlags = CameraClearFlags.Skybox;
-        cam.enabled = true;
-
-        if (loginCamGo.GetComponent<AudioListener>() == null)
-        {
-            loginCamGo.AddComponent<AudioListener>();
-        }
-
-        // Add interactive camera controls (WASD + Mouse/Touch)
-        if (loginCamGo.GetComponent<LobbyCameraController>() == null)
-        {
-            loginCamGo.AddComponent<LobbyCameraController>();
-        }
-
-        // 2. Create secondary cameras for LoginCameraManager race selection
-        string[] raceCameras = new string[] { "CharSelect", "Human", "Elf", "DarkElf", "Orc", "Dwarf" };
-        foreach (string raceName in raceCameras)
-        {
-            GameObject raceGo = GameObject.Find(raceName);
-            if (raceGo == null)
+            // Try to find existing "Login" or "CharSelect" camera
+            GameObject loginCamGo = GameObject.Find("Login");
+            if (loginCamGo == null)
             {
-                raceGo = new GameObject(raceName);
-                raceGo.transform.SetParent(container.transform);
-                raceGo.transform.position = loginCamGo.transform.position;
-                raceGo.transform.rotation = loginCamGo.transform.rotation;
-                Camera raceCam = raceGo.AddComponent<Camera>();
-                raceCam.enabled = false;
-                raceCam.fieldOfView = 60f;
+                loginCamGo = new GameObject("Login");
+                loginCamGo.transform.SetParent(container.transform);
+                loginCamGo.transform.position = new Vector3(4595.33f, -120f, -172.4f);
+                loginCamGo.transform.rotation = Quaternion.Euler(0f, -140f, 0f);
             }
+
+            activeCam = loginCamGo.GetComponent<Camera>();
+            if (activeCam == null)
+            {
+                activeCam = loginCamGo.AddComponent<Camera>();
+            }
+
+            activeCam.tag = "MainCamera";
+            activeCam.fieldOfView = 60f;
+            activeCam.nearClipPlane = 0.3f;
+            activeCam.farClipPlane = 20000f;
+            activeCam.clearFlags = CameraClearFlags.Skybox;
+            activeCam.enabled = true;
+
+            if (loginCamGo.GetComponent<AudioListener>() == null)
+            {
+                loginCamGo.AddComponent<AudioListener>();
+            }
+
+            // Create secondary cameras if missing
+            string[] raceCameras = new string[] { "CharSelect", "Human", "Elf", "DarkElf", "Orc", "Dwarf" };
+            foreach (string raceName in raceCameras)
+            {
+                GameObject raceGo = GameObject.Find(raceName);
+                if (raceGo == null)
+                {
+                    raceGo = new GameObject(raceName);
+                    raceGo.transform.SetParent(container.transform);
+                    raceGo.transform.position = loginCamGo.transform.position;
+                    raceGo.transform.rotation = loginCamGo.transform.rotation;
+                    Camera raceCam = raceGo.AddComponent<Camera>();
+                    raceCam.enabled = false;
+                    raceCam.fieldOfView = 60f;
+                }
+            }
+
+            Debug.Log("[LobbyCameraBootstrap] Lobby MainCamera and race cameras initialized successfully.");
         }
 
-        Debug.Log("[LobbyCameraBootstrap] Lobby MainCamera and race cameras initialized successfully.");
+        // Ensure interactive controller is attached to active camera
+        if (activeCam != null && activeCam.GetComponent<LobbyCameraController>() == null)
+        {
+            activeCam.gameObject.AddComponent<LobbyCameraController>();
+        }
     }
 }
 
 /// <summary>
 /// Free-look / inspection controller for the lobby camera.
-/// Supports keyboard (WASD), mouse dragging, mouse wheel zoom, and mobile touch drag.
+/// Supports keyboard (WASD), mouse dragging, mouse wheel zoom, and numeric keys (1-7) to teleport to character locations.
 /// </summary>
 public class LobbyCameraController : MonoBehaviour
 {
-    [SerializeField] private float _moveSpeed = 30f;
+    [SerializeField] private float _moveSpeed = 35f;
     [SerializeField] private float _lookSpeed = 3f;
-    [SerializeField] private float _zoomSpeed = 10f;
+    [SerializeField] private float _zoomSpeed = 15f;
 
     private float _pitch = 0f;
     private float _yaw = -140f;
     private Vector2 _lastPointerPosition;
     private bool _isDragging = false;
+
+    // Viewpoint bookmarks
+    private static readonly Vector3 LoginPos = new Vector3(4595.33f, -122.27f, -172.41f);
+    private static readonly Vector3 CharSelectPos = new Vector3(4540.89f, -118.02f, -317.32f);
+    private static readonly Vector3 HumanPos = new Vector3(4642.45f, -121.33f, -281.87f);
+    private static readonly Vector3 ElfPos = new Vector3(4705.32f, -122.06f, -165.05f);
+    private static readonly Vector3 DarkElfPos = new Vector3(4765.33f, -122.40f, -216.59f);
+    private static readonly Vector3 OrcPos = new Vector3(4790.28f, -114.52f, -388.61f);
+    private static readonly Vector3 DwarfPos = new Vector3(4578.14f, -120.28f, -418.07f);
 
     private void Start()
     {
@@ -104,8 +140,30 @@ public class LobbyCameraController : MonoBehaviour
 
     private void Update()
     {
+        HandleHotkeys();
         HandleKeyboardMovement();
         HandleMouseAndTouchRotation();
+    }
+
+    private void HandleHotkeys()
+    {
+        // Jump between viewpoints
+        if (Input.GetKeyDown(KeyCode.Alpha1)) JumpTo(LoginPos, 0f, -140f, "Login View");
+        if (Input.GetKeyDown(KeyCode.Alpha2)) JumpTo(CharSelectPos, 0f, -20f, "CharSelect Courtyard");
+        if (Input.GetKeyDown(KeyCode.Alpha3)) JumpTo(HumanPos, 0f, -90f, "Human Spot");
+        if (Input.GetKeyDown(KeyCode.Alpha4)) JumpTo(ElfPos, 0f, 150f, "Elf Spot");
+        if (Input.GetKeyDown(KeyCode.Alpha5)) JumpTo(DarkElfPos, 0f, 100f, "DarkElf Spot");
+        if (Input.GetKeyDown(KeyCode.Alpha6)) JumpTo(OrcPos, 0f, 40f, "Orc Spot");
+        if (Input.GetKeyDown(KeyCode.Alpha7)) JumpTo(DwarfPos, 0f, -45f, "Dwarf Spot");
+    }
+
+    private void JumpTo(Vector3 pos, float pitch, float yaw, string viewName)
+    {
+        transform.position = pos;
+        _pitch = pitch;
+        _yaw = yaw;
+        transform.rotation = Quaternion.Euler(_pitch, _yaw, 0f);
+        Debug.Log($"[LobbyCameraController] Teleported to: {viewName}");
     }
 
     private void HandleKeyboardMovement()
@@ -113,7 +171,7 @@ public class LobbyCameraController : MonoBehaviour
         float speed = _moveSpeed;
         if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         {
-            speed *= 2.5f;
+            speed *= 3f;
         }
 
         float h = Input.GetAxisRaw("Horizontal");
