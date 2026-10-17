@@ -2,9 +2,10 @@ using UnityEngine;
 
 /// <summary>
 /// Ensures that when the scene (e.g. l2_lobby) is played:
-/// 1. Black quad planes (LoginBG, LoginBG2) are deactivated.
-/// 2. Directional sunlight is created if missing.
+/// 1. Black quad planes (LoginBG, LoginBG2) and unbaked probe volumes are deactivated.
+/// 2. Directional sunlight and ambient lighting are properly configured.
 /// 3. The lobby cameras and interactive controls are active and ready.
+/// 4. Any missing or pink materials are safely converted to clean URP Lit materials.
 /// </summary>
 public class LobbyCameraBootstrap : MonoBehaviour
 {
@@ -25,20 +26,48 @@ public class LobbyCameraBootstrap : MonoBehaviour
             Debug.Log("[LobbyCameraBootstrap] Deactivated LoginBG2 quad.");
         }
 
-        // 2. Ensure directional sunlight exists
-        if (Object.FindAnyObjectByType<Light>() == null)
+        // 2. Deactivate unbaked Adaptive Probe Volumes that cause pitch black lighting
+        GameObject apv = GameObject.Find("Adaptive Probe Volume (1)");
+        if (apv != null)
+        {
+            apv.SetActive(false);
+            Debug.Log("[LobbyCameraBootstrap] Deactivated unbaked Adaptive Probe Volume.");
+        }
+        GameObject pvData = GameObject.Find("ProbeVolumePerSceneData");
+        if (pvData != null)
+        {
+            pvData.SetActive(false);
+        }
+
+        // 3. Ensure active directional sunlight exists
+        Light dirLight = null;
+        foreach (var l in Object.FindObjectsByType<Light>(FindObjectsSortMode.None))
+        {
+            if (l.type == LightType.Directional && l.enabled)
+            {
+                dirLight = l;
+                break;
+            }
+        }
+        if (dirLight == null)
         {
             GameObject sunGo = new GameObject("Lobby Sun Light");
-            Light sun = sunGo.AddComponent<Light>();
-            sun.type = LightType.Directional;
-            sun.color = new Color(1f, 0.96f, 0.90f);
-            sun.intensity = 1.3f;
-            sun.shadows = LightShadows.Soft;
+            dirLight = sunGo.AddComponent<Light>();
+            dirLight.type = LightType.Directional;
+            dirLight.color = new Color(1f, 0.96f, 0.90f);
+            dirLight.intensity = 1.6f;
+            dirLight.shadows = LightShadows.Soft;
             sunGo.transform.rotation = Quaternion.Euler(50f, -30f, 0f);
             Debug.Log("[LobbyCameraBootstrap] Created Directional Sun Light.");
         }
+        RenderSettings.sun = dirLight;
 
-        // 3. Find or create Camera container
+        // 4. Configure bright, clean ambient lighting
+        RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Flat;
+        RenderSettings.ambientLight = new Color(0.65f, 0.70f, 0.78f);
+        RenderSettings.ambientIntensity = 1.0f;
+
+        // 5. Find or create Camera container
         GameObject container = GameObject.Find("Cameras");
         if (container == null)
         {
@@ -71,7 +100,6 @@ public class LobbyCameraBootstrap : MonoBehaviour
             activeCam.fieldOfView = 60f;
             activeCam.nearClipPlane = 0.3f;
             activeCam.farClipPlane = 20000f;
-            activeCam.clearFlags = CameraClearFlags.Skybox;
             activeCam.enabled = true;
 
             if (loginCamGo.GetComponent<AudioListener>() == null)
@@ -99,37 +127,53 @@ public class LobbyCameraBootstrap : MonoBehaviour
             Debug.Log("[LobbyCameraBootstrap] Lobby MainCamera and race cameras initialized successfully.");
         }
 
-        // Ensure interactive controller is attached to active camera
-        if (activeCam != null && activeCam.GetComponent<LobbyCameraController>() == null)
+        // Set bright sky background on camera
+        if (activeCam != null)
         {
-            activeCam.gameObject.AddComponent<LobbyCameraController>();
+            activeCam.clearFlags = CameraClearFlags.SolidColor;
+            activeCam.backgroundColor = new Color(0.42f, 0.62f, 0.82f);
+            activeCam.enabled = true;
+
+            if (activeCam.GetComponent<LobbyCameraController>() == null)
+            {
+                activeCam.gameObject.AddComponent<LobbyCameraController>();
+            }
         }
 
-        // 4. Runtime Pink Material safeguard
-        FixAnyRemainingPinkMaterials();
+        // 6. Runtime material and lightprobe safeguard
+        FixRenderersAndMaterials();
     }
 
-    private static void FixAnyRemainingPinkMaterials()
+    private static void FixRenderersAndMaterials()
     {
         Shader urpLitShader = Shader.Find("Universal Render Pipeline/Lit");
-        if (urpLitShader == null) return;
-
-        Material fallbackMat = new Material(urpLitShader);
-        fallbackMat.color = new Color(0.65f, 0.62f, 0.58f);
+        Material fallbackMat = null;
+        if (urpLitShader != null)
+        {
+            fallbackMat = new Material(urpLitShader);
+            fallbackMat.color = new Color(0.68f, 0.65f, 0.60f);
+            fallbackMat.SetFloat("_Smoothness", 0.35f);
+        }
 
         Renderer[] renderers = Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None);
         int fixedCount = 0;
         foreach (var r in renderers)
         {
+            // Disable light probe sampling from unbaked black probes
+            r.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+
             Material[] mats = r.sharedMaterials;
             bool changed = false;
             for (int i = 0; i < mats.Length; i++)
             {
                 if (mats[i] == null || mats[i].shader == null || mats[i].shader.name == "Hidden/InternalErrorShader" || string.IsNullOrEmpty(mats[i].shader.name))
                 {
-                    mats[i] = fallbackMat;
-                    changed = true;
-                    fixedCount++;
+                    if (fallbackMat != null)
+                    {
+                        mats[i] = fallbackMat;
+                        changed = true;
+                        fixedCount++;
+                    }
                 }
             }
             if (changed)

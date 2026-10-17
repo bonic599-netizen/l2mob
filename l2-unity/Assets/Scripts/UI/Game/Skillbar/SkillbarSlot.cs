@@ -4,6 +4,42 @@ using UnityEngine.UIElements;
 
 [System.Serializable]
 public class SkillbarSlot : SkillSlot
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 {
     private L2Slot _innerSlot;
     private Shortcut _shortcut;

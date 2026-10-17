@@ -1,8 +1,8 @@
 ﻿<Solution>
+  <Project Path="Animancer.csproj" />
   <Project Path="Animancer.FSM.csproj" />
   <Project Path="Unity.RenderPipelines.Universal.Runtime.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
-  <Project Path="Animancer.csproj" />
   <Project Path="Boxophobic.AtmosphericHeightFog.Runtime.csproj" />
   <Project Path="Boxophobic.Utils.Editor.csproj" />
   <Project Path="Assembly-CSharp-firstpass.csproj" />
@@ -15,6 +15,6 @@
   <Project Path="Boxophobic.Utils.Scripts.csproj" />
   <Project Path="Assembly-CSharp-Editor-firstpass.csproj" />
   <Project Path="FMODUnityResonance.csproj" />
-  <Project Path="JBooth.MicroSplat.Core.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
+  <Project Path="JBooth.MicroSplat.Core.csproj" />
 </Solution>

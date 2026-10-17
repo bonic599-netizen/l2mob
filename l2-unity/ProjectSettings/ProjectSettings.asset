@@ -773,6 +773,7 @@ PlayerSettings:
   webProgressiveAssetLoading: 0
   scriptingDefineSymbols:
     Standalone: UNITY_PIPELINE_URP;__MICROSPLAT__;__MICROSPLAT_TRIPLANAR__
+    iPhone: __MICROSPLAT__;__MICROSPLAT_TRIPLANAR__;SENTIS_ANALYTICS_ENABLED;APP_UI_EDITOR_ONLY
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
