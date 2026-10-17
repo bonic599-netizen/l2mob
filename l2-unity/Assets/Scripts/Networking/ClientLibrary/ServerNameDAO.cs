@@ -5,7 +5,7 @@ public class ServerNameDAO
     private static Dictionary<int, string> SERVERS = new Dictionary<int, string>();
 
     public static void InitServerList() {
-        SERVERS[1] = "Bartz";
+        SERVERS[1] = "Hellsing";
         SERVERS[2] = "Sieghardt";
         SERVERS[3] = "Kain";
         SERVERS[4] = "Lionna";

@@ -1,16 +1,49 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /// <summary>
-/// Ensures that when the scene (e.g. l2_lobby) is played:
-/// 1. Black quad planes (LoginBG, LoginBG2) and unbaked probe volumes are deactivated.
-/// 2. Directional sunlight and ambient lighting are properly configured.
-/// 3. The lobby cameras and interactive controls are active and ready.
-/// 4. Any missing or pink materials are safely converted to clean URP Lit materials.
+/// Ensures that when the scene (e.g. Menu or l2_lobby) is played:
+/// 1. If started directly from l2_lobby without GameManager, boots Menu scene so LoginWindow, Pawns, Datatables, and Networking load.
+/// 2. Black quad planes (LoginBG, LoginBG2) and unbaked probe volumes are deactivated.
+/// 3. Directional sunlight and ambient lighting are properly configured.
+/// 4. The lobby cameras and interactive controls are active and ready.
 /// </summary>
 public class LobbyCameraBootstrap : MonoBehaviour
 {
+    private static bool _hookedSceneLoaded = false;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
     public static void InitializeLobbyCamera()
+    {
+        if (!_hookedSceneLoaded)
+        {
+            _hookedSceneLoaded = true;
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        // If user pressed Play directly in l2_lobby.unity, boot Menu scene so Login UI, Datatables, Pawns, and Networking load
+        if (GameManager.Instance == null && SceneManager.GetActiveScene().name == "l2_lobby")
+        {
+            if (Application.CanStreamedLevelBeLoaded("Menu"))
+            {
+                Debug.Log("[LobbyCameraBootstrap] Booting 'Menu' scene to initialize Login UI, Character Pawns, Datatables, and Hellsing Networking...");
+                SceneManager.LoadScene("Menu");
+                return;
+            }
+        }
+
+        ApplyLobbySceneFixes();
+    }
+
+    private static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "l2_lobby" || scene.name == "Menu")
+        {
+            ApplyLobbySceneFixes();
+        }
+    }
+
+    public static void ApplyLobbySceneFixes()
     {
         // 1. Deactivate blocking background quads
         GameObject bg1 = GameObject.Find("LoginBG");

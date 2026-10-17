@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 public abstract class DefaultClient : MonoBehaviour
 {
-    [SerializeField] protected string _serverIp = "127.0.0.1";
-    [SerializeField] protected int _serverPort = 11000;
+    [SerializeField] protected string _serverIp = "62.169.27.91";
+    [SerializeField] protected int _serverPort = 2106;
     [SerializeField] protected AsynchronousClient _client;
     [SerializeField] protected int _connectionTimeoutMs = 10000;
     [SerializeField] protected bool _connected = false;
