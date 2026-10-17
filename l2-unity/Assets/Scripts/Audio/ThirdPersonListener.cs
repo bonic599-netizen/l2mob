@@ -20,7 +20,7 @@ public class ThirdPersonListener : MonoBehaviour
             Destroy(this);
         }
 
-        if(_cam == null) {
+        if(_cam == null && Camera.main != null) {
             _cam = Camera.main.gameObject;
         }
     }
@@ -30,6 +30,10 @@ public class ThirdPersonListener : MonoBehaviour
     }
 
     void Update() {
+        if(_cam == null && Camera.main != null) {
+            _cam = Camera.main.gameObject;
+        }
+
         if(_player == null) {
             if(PlayerController.Instance != null) {
                 _player = PlayerController.Instance.gameObject;
@@ -38,9 +42,11 @@ public class ThirdPersonListener : MonoBehaviour
             _attributes.position = FMODUnity.RuntimeUtils.ToFMODVector(_player.transform.position);
         }
         
-        _attributes.forward = FMODUnity.RuntimeUtils.ToFMODVector(_cam.transform.forward);
-        _attributes.up = FMODUnity.RuntimeUtils.ToFMODVector(_cam.transform.up);
-        FMODUnity.RuntimeManager.StudioSystem.setListenerAttributes(_listener, _attributes);
+        if(_cam != null) {
+            _attributes.forward = FMODUnity.RuntimeUtils.ToFMODVector(_cam.transform.forward);
+            _attributes.up = FMODUnity.RuntimeUtils.ToFMODVector(_cam.transform.up);
+            FMODUnity.RuntimeManager.StudioSystem.setListenerAttributes(_listener, _attributes);
+        }
     }
 }
 
