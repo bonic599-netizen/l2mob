@@ -104,6 +104,43 @@ public class LobbyCameraBootstrap : MonoBehaviour
         {
             activeCam.gameObject.AddComponent<LobbyCameraController>();
         }
+
+        // 4. Runtime Pink Material safeguard
+        FixAnyRemainingPinkMaterials();
+    }
+
+    private static void FixAnyRemainingPinkMaterials()
+    {
+        Shader urpLitShader = Shader.Find("Universal Render Pipeline/Lit");
+        if (urpLitShader == null) return;
+
+        Material fallbackMat = new Material(urpLitShader);
+        fallbackMat.color = new Color(0.65f, 0.62f, 0.58f);
+
+        Renderer[] renderers = Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None);
+        int fixedCount = 0;
+        foreach (var r in renderers)
+        {
+            Material[] mats = r.sharedMaterials;
+            bool changed = false;
+            for (int i = 0; i < mats.Length; i++)
+            {
+                if (mats[i] == null || mats[i].shader == null || mats[i].shader.name == "Hidden/InternalErrorShader" || string.IsNullOrEmpty(mats[i].shader.name))
+                {
+                    mats[i] = fallbackMat;
+                    changed = true;
+                    fixedCount++;
+                }
+            }
+            if (changed)
+            {
+                r.sharedMaterials = mats;
+            }
+        }
+        if (fixedCount > 0)
+        {
+            Debug.Log($"[LobbyCameraBootstrap] Replaced {fixedCount} missing/pink materials with URP Lit fallback.");
+        }
     }
 }
 

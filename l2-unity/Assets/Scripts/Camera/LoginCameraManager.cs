@@ -32,19 +32,43 @@ public class LoginCameraManager : MonoBehaviour
     {
         _initialized = true;
 
-        cameras.Add("Login", GameObject.Find("Login").GetComponent<Camera>());
-        cameras.Add("CharSelect", GameObject.Find("CharSelect").GetComponent<Camera>());
-        cameras.Add(SysStringTable.Instance.GetSysString(172).Name, GameObject.Find("DarkElf").GetComponent<Camera>());
-        cameras.Add(SysStringTable.Instance.GetSysString(173).Name, GameObject.Find("Orc").GetComponent<Camera>());
-        cameras.Add(SysStringTable.Instance.GetSysString(174).Name, GameObject.Find("Dwarf").GetComponent<Camera>());
-        cameras.Add(SysStringTable.Instance.GetSysString(171).Name, GameObject.Find("Elf").GetComponent<Camera>());
-        cameras.Add(SysStringTable.Instance.GetSysString(170).Name, GameObject.Find("Human").GetComponent<Camera>());
+        AddCameraSafe("Login", "Login");
+        AddCameraSafe("CharSelect", "CharSelect");
+
+        string darkElfName = GetSysStringSafe(172, "DarkElf");
+        string orcName = GetSysStringSafe(173, "Orc");
+        string dwarfName = GetSysStringSafe(174, "Dwarf");
+        string elfName = GetSysStringSafe(171, "Elf");
+        string humanName = GetSysStringSafe(170, "Human");
+
+        AddCameraSafe(darkElfName, "DarkElf");
+        AddCameraSafe(orcName, "Orc");
+        AddCameraSafe(dwarfName, "Dwarf");
+        AddCameraSafe(elfName, "Elf");
+        AddCameraSafe(humanName, "Human");
 
         DisableCameras();
+    }
 
-        // GameManager.Instance.OnLoginCamerasInitialized();
+    private string GetSysStringSafe(int id, string fallback)
+    {
+        try {
+            if (SysStringTable.Instance != null) {
+                var entry = SysStringTable.Instance.GetSysString(id);
+                if (entry != null && !string.IsNullOrEmpty(entry.Name)) return entry.Name;
+            }
+        } catch { }
+        return fallback;
+    }
 
-        // GameManager.Instance.NotifyEvent(GameEvent.LOADING_COMPLETE);
+    private void AddCameraSafe(string key, string gameObjectName)
+    {
+        if (cameras.ContainsKey(key)) return;
+        GameObject go = GameObject.Find(gameObjectName);
+        if (go != null) {
+            Camera cam = go.GetComponent<Camera>();
+            if (cam != null) cameras.Add(key, cam);
+        }
     }
 
     public Camera SelectClassCamera(string race, int charClass)
