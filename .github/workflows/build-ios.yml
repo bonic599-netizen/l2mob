@@ -30,12 +30,19 @@ jobs:
           restore-keys: |
             Library-iOS-
 
+      - name: Install Unity License File
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        run: |
+          sudo mkdir -p "/Library/Application Support/Unity"
+          echo "$UNITY_LICENSE" | sudo tee "/Library/Application Support/Unity/Unity_lic.ulf" > /dev/null
+          sudo chmod 644 "/Library/Application Support/Unity/Unity_lic.ulf"
+          echo "Unity license installed successfully."
+
       - name: Build Unity iOS Project
         uses: game-ci/unity-builder@v4
         env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
-          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+          SKIP_ACTIVATION: "true"
         with:
           projectPath: l2-unity
           unityVersion: ${{ github.event.inputs.unityVersion || '6000.3.21f1' }}
