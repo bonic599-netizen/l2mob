@@ -180,14 +180,6 @@ public class LobbyCameraBootstrap : MonoBehaviour
     private static void FixRenderersAndMaterials()
     {
         Shader urpLitShader = Shader.Find("Universal Render Pipeline/Lit");
-        Material fallbackMat = null;
-        if (urpLitShader != null)
-        {
-            fallbackMat = new Material(urpLitShader);
-            fallbackMat.color = new Color(0.68f, 0.65f, 0.60f);
-            fallbackMat.SetFloat("_Smoothness", 0.35f);
-        }
-
         Renderer[] renderers = Object.FindObjectsByType<Renderer>(FindObjectsSortMode.None);
         int fixedCount = 0;
         foreach (var r in renderers)
@@ -196,27 +188,30 @@ public class LobbyCameraBootstrap : MonoBehaviour
             r.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
 
             Material[] mats = r.sharedMaterials;
-            bool changed = false;
             for (int i = 0; i < mats.Length; i++)
             {
-                if (mats[i] == null || mats[i].shader == null || mats[i].shader.name == "Hidden/InternalErrorShader" || string.IsNullOrEmpty(mats[i].shader.name))
+                if (mats[i] != null && (mats[i].shader == null || mats[i].shader.name == "Hidden/InternalErrorShader" || string.IsNullOrEmpty(mats[i].shader.name)))
                 {
-                    if (fallbackMat != null)
+                    if (urpLitShader != null)
                     {
-                        mats[i] = fallbackMat;
-                        changed = true;
+                        Texture existingTex = mats[i].HasProperty("_BaseMap") ? mats[i].GetTexture("_BaseMap") : null;
+                        if (existingTex == null && mats[i].HasProperty("_MainTex"))
+                        {
+                            existingTex = mats[i].GetTexture("_MainTex");
+                        }
+                        mats[i].shader = urpLitShader;
+                        if (existingTex != null)
+                        {
+                            mats[i].SetTexture("_BaseMap", existingTex);
+                        }
                         fixedCount++;
                     }
                 }
             }
-            if (changed)
-            {
-                r.sharedMaterials = mats;
-            }
         }
         if (fixedCount > 0)
         {
-            Debug.Log($"[LobbyCameraBootstrap] Replaced {fixedCount} missing/pink materials with URP Lit fallback.");
+            Debug.Log($"[LobbyCameraBootstrap] Upgraded {fixedCount} error-shader materials to URP Lit while preserving textures.");
         }
     }
 }

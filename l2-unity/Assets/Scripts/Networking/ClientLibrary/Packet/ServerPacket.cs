@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -15,64 +15,77 @@ public abstract class ServerPacket : Packet
 
     protected byte ReadB()
     {
+        if (_packetData == null || _iterator >= _packetData.Length) return 0;
         return _packetData[_iterator++];
     }
 
     protected byte[] ReadB(int length)
     {
         byte[] data = new byte[length];
-        Array.Copy(_packetData, _iterator, data, 0, length);
-        _iterator += length;
+        if (_packetData == null || _iterator >= _packetData.Length) return data;
+        int avail = Math.Min(length, _packetData.Length - _iterator);
+        Array.Copy(_packetData, _iterator, data, 0, avail);
+        _iterator += avail;
 
         return data;
     }
 
     protected virtual int ReadI()
     {
-        byte[] data = new byte[4];
-        Array.Copy(_packetData, _iterator, data, 0, 4);
-        // Array.Reverse(data);
-        int value = BitConverter.ToInt32(data, 0);
+        if (_packetData == null || _iterator + 4 > _packetData.Length)
+        {
+            _iterator = _packetData != null ? _packetData.Length : 0;
+            return 0;
+        }
+        int value = BitConverter.ToInt32(_packetData, _iterator);
         _iterator += 4;
         return value;
     }
 
     protected virtual long ReadL()
     {
-        byte[] data = new byte[8];
-        Array.Copy(_packetData, _iterator, data, 0, 8);
-        // Array.Reverse(data);
-        long value = BitConverter.ToInt64(data, 0);
+        if (_packetData == null || _iterator + 8 > _packetData.Length)
+        {
+            _iterator = _packetData != null ? _packetData.Length : 0;
+            return 0;
+        }
+        long value = BitConverter.ToInt64(_packetData, _iterator);
         _iterator += 8;
         return value;
     }
 
     protected virtual float ReadF()
     {
-        byte[] data = new byte[4];
-        Array.Copy(_packetData, _iterator, data, 0, 4);
-        // Array.Reverse(data);
-        float value = BitConverter.ToSingle(data, 0);
+        if (_packetData == null || _iterator + 4 > _packetData.Length)
+        {
+            _iterator = _packetData != null ? _packetData.Length : 0;
+            return 0f;
+        }
+        float value = BitConverter.ToSingle(_packetData, _iterator);
         _iterator += 4;
         return value;
     }
 
     protected virtual double ReadD()
     {
-        byte[] data = new byte[8];
-        Array.Copy(_packetData, _iterator, data, 0, 8);
-        // Array.Reverse(data);
-        double value = BitConverter.ToDouble(data, 0);
+        if (_packetData == null || _iterator + 8 > _packetData.Length)
+        {
+            _iterator = _packetData != null ? _packetData.Length : 0;
+            return 0.0;
+        }
+        double value = BitConverter.ToDouble(_packetData, _iterator);
         _iterator += 8;
         return value;
     }
 
     protected virtual int ReadH()
     {
-        byte[] data = new byte[2];
-        Array.Copy(_packetData, _iterator, data, 0, 2);
-        // Array.Reverse(data);
-        double value = BitConverter.ToInt16(data, 0);
+        if (_packetData == null || _iterator + 2 > _packetData.Length)
+        {
+            _iterator = _packetData != null ? _packetData.Length : 0;
+            return 0;
+        }
+        short value = BitConverter.ToInt16(_packetData, _iterator);
         _iterator += 2;
         return (int)value;
     }
@@ -81,14 +94,11 @@ public abstract class ServerPacket : Packet
     {
         List<char> chars = new List<char>();
 
-        // Read chars until we hit the null terminator
-        while (true)
+        while (_packetData != null && _iterator + 2 <= _packetData.Length)
         {
-            // Read 2 bytes as a char (matching Java's putChar)
             char c = BitConverter.ToChar(_packetData, _iterator);
-            _iterator += 2; // Move iterator by 2 bytes
+            _iterator += 2;
 
-            // Check for null terminator
             if (c == '\0')
                 break;
 

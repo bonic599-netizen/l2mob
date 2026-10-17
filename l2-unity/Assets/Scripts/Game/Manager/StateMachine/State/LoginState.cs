@@ -22,6 +22,8 @@ public class LoginState : GameStateBase
             case GameEvent.CONNECTION_ALLOWED:
                 _stateMachine.ChangeState(GameState.LOGIN_CONNECTED);
                 break;
+            case GameEvent.LOGIN_DISCONNECTED:
+                break;
             default:
                 Debug.LogWarning($"[GameStateMachine] Unhandled event {evt} for state {_stateMachine.State}");
                 break;

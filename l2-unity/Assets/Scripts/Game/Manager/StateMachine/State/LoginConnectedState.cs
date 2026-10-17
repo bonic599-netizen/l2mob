@@ -17,6 +17,8 @@ public class LoginConnectedState : GameStateBase
             case GameEvent.AUTH_ALLOWED:
                 _stateMachine.ChangeState(GameState.LOGIN_AUTHED);
                 break;
+            case GameEvent.CONNECTION_ALLOWED:
+                break;
             case GameEvent.LOGIN_DISCONNECTED:
                 _stateMachine.ChangeState(GameState.LOGIN_SCREEN);
                 break;

@@ -1,4 +1,5 @@
 using System;
+using System.Numerics;
 using System.Security.Cryptography;
 using UnityEngine;
 
@@ -7,6 +8,7 @@ public class RSACrypt
     private RSACryptoServiceProvider _rsaProvider;
     private RSA _rsa;
     private RSAParameters _rsaParams;
+    private byte[] _modulus;
     // hardcoded modulus
     private byte[] _exponent = new byte[] { 1, 0, 1 };
 
@@ -16,6 +18,7 @@ public class RSACrypt
             UnscrambledRSAKey(exponent);
         }
 
+        _modulus = (byte[])exponent.Clone();
         InitRSACrypt(exponent);
     }
 
@@ -44,11 +47,19 @@ public class RSACrypt
 
     public byte[] EncryptRSANoPadding(byte[] block) {
         try {
-            // Encrypt without padding
-            return _rsaProvider.Encrypt(block, false);
+            byte[] mLe = new byte[block.Length + 1];
+            for (int i = 0; i < block.Length; i++) mLe[i] = block[block.Length - 1 - i];
+            byte[] nLe = new byte[_modulus.Length + 1];
+            for (int i = 0; i < _modulus.Length; i++) nLe[i] = _modulus[_modulus.Length - 1 - i];
+            BigInteger m = new BigInteger(mLe);
+            BigInteger n = new BigInteger(nLe);
+            BigInteger c = BigInteger.ModPow(m, 65537, n);
+            byte[] cLe = c.ToByteArray();
+            byte[] res = new byte[128];
+            for (int i = 0; i < Math.Min(128, cLe.Length); i++) res[127 - i] = cLe[i];
+            return res;
         } catch (Exception ex) {
-            // Handle other unexpected errors
-            Debug.LogError($"Unexpected error during RSA encryption: {ex.Message}");
+            Debug.LogError($"Unexpected error during raw RSA encryption: {ex.Message}");
             return null;
         }
     }

@@ -6,12 +6,12 @@ public class RequestCharCreatePacket : ClientPacket
         WriteI((int)race);
         WriteI((int)sex);
         WriteI((int)characterClass);
-        WriteI(0);
-        WriteI(0);
-        WriteI(0);
-        WriteI(0);
-        WriteI(0);
-        WriteI(0);
+        WriteI(21); // INT
+        WriteI(40); // STR
+        WriteI(43); // CON
+        WriteI(25); // MEN
+        WriteI(30); // DEX
+        WriteI(11); // WIT
         WriteI(hairstyle);
         WriteI(haircolor);
         WriteI(face);

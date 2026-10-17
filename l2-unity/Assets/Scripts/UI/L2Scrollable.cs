@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[System.Serializable]
 public class L2Scrollable
 {
     protected ScrollView _scrollView;

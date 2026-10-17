@@ -22,7 +22,7 @@ public class InventoryWindow : L2PopupWindow
     public InventoryGearTab GearTab { get => _gearTab; }
     [SerializeField] private InventoryTab[] _tabs;
 
-    public List<ItemInstance> _playerItems;
+    [System.NonSerialized] public List<ItemInstance> _playerItems;
 
     [SerializeField] private int _usedSlots;
     [SerializeField] private int _slotCount;

@@ -51,8 +51,11 @@ public class AsynchronousClient
 
     public bool Connect()
     {
-        IPHostEntry ipHostInfo = Dns.GetHostEntry(_ipAddress);
-        IPAddress ipAddress = ipHostInfo.AddressList[0];
+        if (!IPAddress.TryParse(_ipAddress, out IPAddress ipAddress))
+        {
+            IPHostEntry ipHostInfo = Dns.GetHostEntry(_ipAddress);
+            ipAddress = ipHostInfo.AddressList[0];
+        }
         _socket = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
         if (_initPacketEnabled)
@@ -197,7 +200,8 @@ public class AsynchronousClient
                 int newBytes = 0;
                 while ((newBytes != -1) && (receivedBytes < length))
                 {
-                    newBytes = stream.Read(data, 0, length);
+                    newBytes = stream.Read(data, receivedBytes, length - receivedBytes);
+                    if (newBytes <= 0) break;
                     receivedBytes += newBytes;
                 }
 

@@ -1,10 +1,9 @@
-﻿using UnityEngine;
+using UnityEngine;
 class InitPacket : LoginServerPacket
 {
     private int sessionId;
     private int rsaKeyLength;
     private byte[] publicKey;
-    private int blowfishKeyLength;
     private byte[] blowfishKey;
 
     public int SessionId { get { return sessionId; } }
@@ -20,15 +19,12 @@ class InitPacket : LoginServerPacket
     public override void Parse()
     {
         sessionId = ReadI();
-        rsaKeyLength = ReadI();
-        publicKey = ReadB(rsaKeyLength);
-        blowfishKeyLength = ReadI();
-        blowfishKey = ReadB(blowfishKeyLength);
+        int protocolRevision = ReadI();
+        rsaKeyLength = 128;
+        publicKey = ReadB(128);
+        ReadB(16); // GameGuard bytes
+        blowfishKey = ReadB(16);
 
-        Debug.Log($"sessionId [{sessionId}]");
-        Debug.Log($"rsaKeyLength [{rsaKeyLength}]");
-        Debug.Log($"publicKey [{StringUtils.ByteArrayToString(publicKey)}]");
-        Debug.Log($"blowfishKeyLength [{blowfishKeyLength}]");
-        Debug.Log($"blowfishKey [{StringUtils.ByteArrayToString(blowfishKey)}]");
+        Debug.Log($"InitPacket: sessionId [{sessionId:X8}], protocol [{protocolRevision:X8}]");
     }
 }

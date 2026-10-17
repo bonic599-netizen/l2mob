@@ -1,6 +1,7 @@
 using System;
 using UnityEngine.UIElements;
 
+[System.Serializable]
 public class L2DraggableSlot : L2ClickableSlot
 {
     protected SlotDragManipulator _slotDragManipulator;

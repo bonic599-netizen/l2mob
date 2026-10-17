@@ -1,6 +1,7 @@
 public enum LoginClientPacketType : byte {
-    Ping = 0x00,
-    AuthRequest = 0x01,
-    RequestServerList = 0x02,
-    RequestServerLogin = 0x03
+    AuthRequest = 0x00,
+    RequestServerLogin = 0x02,
+    RequestServerList = 0x05,
+    RequestGGAuth = 0x07,
+    Ping = 0x99
 }

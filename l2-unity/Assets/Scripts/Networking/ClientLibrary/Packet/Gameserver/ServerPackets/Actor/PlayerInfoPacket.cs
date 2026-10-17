@@ -187,12 +187,22 @@ public class PlayerInfoPacket : ServerPacket
 
 
             Identity.IsMage = CharacterClassParser.IsMage((CharacterClass)Identity.PlayerClass);
-            Identity.Owned = Identity.Id == GameClient.Instance.CurrentPlayerId;
+            if (GameClient.Instance != null)
+            {
+                var pInfo = GameClient.Instance.PlayerInfo;
+                if (pInfo.Identity != null)
+                {
+                    pInfo.Identity.Id = Identity.Id;
+                    GameClient.Instance.PlayerInfo = pInfo;
+                }
+            }
+            Identity.Owned = true;
 
             Stats.RunSpeed = (int)(Stats.MoveSpeedMultiplier > 0 ? Stats.RunSpeed * Stats.MoveSpeedMultiplier : Stats.RunSpeed);
             Stats.WalkSpeed = (int)(Stats.MoveSpeedMultiplier > 0 ? Stats.WalkSpeed * Stats.MoveSpeedMultiplier : Stats.WalkSpeed);
             // Stats.PAtkSpd = (int)(Stats.AttackSpeedMultiplier > 0 ? Stats.PAtkSpd * Stats.AttackSpeedMultiplier : Stats.PAtkSpd);
-            Stats.AttackRange = ReadI() / 52.5f;
+            int rawRange = ReadI();
+            Stats.AttackRange = (rawRange > 0 && rawRange < 5000 ? rawRange : 40f) / 52.5f;
 
             Debug.Log(ToString());
         }

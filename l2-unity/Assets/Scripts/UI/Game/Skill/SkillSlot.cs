@@ -1,6 +1,7 @@
-﻿using UnityEngine.UIElements;
+using UnityEngine.UIElements;
 using UnityEngine;
 
+[System.Serializable]
 public class SkillSlot : L2DraggableSlot
 {
     protected SkillInfo _skillInfo;

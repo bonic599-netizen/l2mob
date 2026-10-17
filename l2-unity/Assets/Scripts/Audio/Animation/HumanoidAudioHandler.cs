@@ -7,7 +7,7 @@ public class HumanoidAudioHandler : BaseAnimationAudioHandler
 {
     [SerializeField] protected CharacterModelSound _race;
     [SerializeField] protected SurfaceDetector _surfaceDetector;
-    [SerializeField] protected Chargrp _chargrp;
+    protected Chargrp _chargrp;
 
     protected override void Initialize()
     {

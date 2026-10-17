@@ -3,6 +3,7 @@ using System;
 using UnityEngine;
 using UnityEngine.UIElements;
 
+[System.Serializable]
 public class L2ClickableSlot : L2Slot
 {
     private bool _leftMouseUp;

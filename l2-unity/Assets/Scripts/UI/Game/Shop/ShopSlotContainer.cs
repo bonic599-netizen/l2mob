@@ -7,14 +7,14 @@ using UnityEngine.UIElements;
 [System.Serializable]
 public class ShopSlotContainer : L2SlotContainer
 {
-    [SerializeField] private List<Product> _products;
+    private List<Product> _products;
     [SerializeField] private L2Slot.SlotType _slotType;
     [SerializeField] private ShopTab.ShopTabType _shopType;
     [SerializeField] private Action _updateCallback;
     [SerializeField] private int _contentWeight;
     [SerializeField] private int _contentPrice;
-    [SerializeField] private List<ItemInstance> _items;
-    [SerializeField] private ShopSlotContainer _adjacentContainer;
+    private List<ItemInstance> _items;
+    private ShopSlotContainer _adjacentContainer;
 
     public int ContentWeight { get { return _contentWeight; } }
     public int ContentPrice { get { return _contentPrice; } }

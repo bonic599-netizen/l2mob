@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 [System.Serializable]
 public class Node {
@@ -6,7 +6,7 @@ public class Node {
 	public Vector3 worldPosition;
 	public Vector3 center;
 
-	public Node parentNode;
+	[System.NonSerialized] public Node parentNode;
 	public float cost;
 
 	public Node() {}

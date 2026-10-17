@@ -11,9 +11,8 @@ public class VersionCheckPacket : ServerPacket
 
     public override void Parse()
     {
-        ReadB();
+        AuthAllowed = ReadB() == 1;
         BlowFishKey = ReadB(8);
-        UseBlowfishCipher = ReadI() == 1;
-        AuthAllowed = ReadI() == 1;
+        UseBlowfishCipher = true;
     }
 }

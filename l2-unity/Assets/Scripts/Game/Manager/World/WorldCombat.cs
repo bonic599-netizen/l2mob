@@ -6,7 +6,7 @@ using static StatusUpdatePacket;
 
 public class WorldCombat : MonoBehaviour
 {
-    [SerializeField] private List<Hit> _hits;
+    private List<Hit> _hits;
     [SerializeField] private float _projectilesSpeed = 20f;
     private EventProcessor _eventProcessor;
     private WorldSpawner _worldSpawner;

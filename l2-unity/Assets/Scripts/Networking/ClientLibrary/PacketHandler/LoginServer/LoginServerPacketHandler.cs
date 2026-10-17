@@ -39,6 +39,9 @@ public class LoginServerPacketHandler : ServerPacketHandler
             case LoginServerPacketType.PlayOk:
                 OnPlayOk(data);
                 break;
+            case LoginServerPacketType.GGAuth:
+                OnGGAuth(data);
+                break;
         }
     }
 
@@ -97,15 +100,25 @@ public class LoginServerPacketHandler : ServerPacketHandler
         byte[] rsaKey = packet.PublicKey;
         byte[] blowfishKey = packet.BlowfishKey;
 
-        LoginClient.Instance.SetRSAKey(rsaKey);
+        LoginClient.Instance.SessionKey1 = 0;
+        LoginClient.Instance.SessionKey2 = 0;
+        GameClient.Instance.SessionKey1 = 0;
+        GameClient.Instance.SessionKey2 = 0;
 
+        LoginClient.Instance.SetRSAKey(rsaKey);
         LoginClient.Instance.SetBlowFishKey(blowfishKey);
 
         _client.InitPacket = false;
 
-        // EventProcessor.Instance.QueueEvent(() => ((LoginClientPacketHandler)_clientPacketHandler).SendPing());
+        int sessionId = packet.SessionId;
+        EventProcessor.Instance.QueueEvent(() => ((LoginClientPacketHandler)_clientPacketHandler).SendRequestGGAuth(sessionId));
+    }
 
-        EventProcessor.Instance.QueueEvent(() => ((LoginClientPacketHandler)_clientPacketHandler).SendAuth());
+    private void OnGGAuth(byte[] data)
+    {
+        int ggSessionId = data.Length >= 5 ? BitConverter.ToInt32(data, 1) : 0;
+        Debug.Log($"OnGGAuth received: sessionId={ggSessionId:X8}");
+        EventProcessor.Instance.QueueEvent(() => ((LoginClientPacketHandler)_clientPacketHandler).SendAuth(ggSessionId));
     }
 
     private void OnLoginFail(byte[] data)
@@ -170,8 +183,14 @@ public class LoginServerPacketHandler : ServerPacketHandler
     {
         ServerListPacket packet = new ServerListPacket(data);
 
-        EventProcessor.Instance.QueueEvent(
-            () => LoginClient.Instance.OnServerListReceived(packet));
+        EventProcessor.Instance.QueueEvent(() =>
+        {
+            if (GameManager.Instance.State == GameState.LOGIN_CONNECTED)
+            {
+                LoginClient.Instance.OnAuthAllowed();
+            }
+            LoginClient.Instance.OnServerListReceived(packet);
+        });
     }
 
     private void OnPlayFail(byte[] data)

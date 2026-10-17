@@ -1,7 +1,8 @@
-﻿using System.Collections;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+[System.Serializable]
 public class FlotatingText {
     public string value;
     public Color color;

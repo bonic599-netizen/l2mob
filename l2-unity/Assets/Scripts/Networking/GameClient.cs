@@ -5,7 +5,7 @@ using System;
 
 public class GameClient : DefaultClient
 {
-    [SerializeField] protected PlayerInfo _playerInfo;
+    protected PlayerInfo _playerInfo;
     [SerializeField] protected int _serverId;
     [SerializeField] private int _playKey1;
     [SerializeField] private int _playKey2;

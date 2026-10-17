@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System;
 using System.Threading;
 
@@ -420,16 +420,29 @@ public class GameServerPacketHandler : ServerPacketHandler
     private void OnPlayerInfoReceive(byte[] data)
     {
         PlayerInfoPacket packet = new PlayerInfoPacket(data);
-        WorldSpawner.Instance.OnReceivePlayerInfo(packet.Identity, packet.Status, packet.Stats, packet.Appearance, packet.EntityActionInfo);
-
-        PlayerInventory.Instance.SetInventorySize(packet.InventorySpace);
+        _eventProcessor.QueueEvent(() =>
+        {
+            if (WorldSpawner.Instance != null)
+            {
+                WorldSpawner.Instance.OnReceivePlayerInfo(packet.Identity, packet.Status, packet.Stats, packet.Appearance, packet.EntityActionInfo);
+            }
+            if (PlayerInventory.Instance != null)
+            {
+                PlayerInventory.Instance.SetInventorySize(packet.InventorySpace);
+            }
+        });
     }
 
     private void OnUserInfoReceived(byte[] data)
     {
         UserInfoPacket packet = new UserInfoPacket(data);
-
-        WorldSpawner.Instance.OnReceiveUserInfo(packet.Identity, packet.Status, packet.Stats, packet.Appearance, packet.EntityActionInfo);
+        _eventProcessor.QueueEvent(() =>
+        {
+            if (WorldSpawner.Instance != null)
+            {
+                WorldSpawner.Instance.OnReceiveUserInfo(packet.Identity, packet.Status, packet.Stats, packet.Appearance, packet.EntityActionInfo);
+            }
+        });
     }
 
     private void OnUpdatePosition(byte[] data)

@@ -6,9 +6,9 @@ public abstract class L2UI : MonoBehaviour
     private VisualElement _rootElement;
 
     [SerializeField] private bool _uiLoaded = false;
-    [SerializeField] private Focusable _focusedElement;
+    private Focusable _focusedElement;
     [SerializeField] private bool _mouseOverUI = false;
-    [SerializeField] private VisualElement _loadingElement;
+    private VisualElement _loadingElement;
 
     protected VisualElement _rootVisualContainer;
     protected VisualElement _popupVisualContainer;

@@ -61,6 +61,8 @@ public class World : MonoBehaviour
         TargetManager.Instance.SetMask(_simpleEntityMask);
     }
 
+    private GameObject _fallbackGround;
+
     public float GetGroundHeight(Vector3 pos)
     {
         RaycastHit hit;
@@ -69,7 +71,46 @@ public class World : MonoBehaviour
             return hit.point.y;
         }
 
+        EnsureFallbackGround(pos);
         return pos.y;
+    }
+
+    private void EnsureFallbackGround(Vector3 pos)
+    {
+        if (_fallbackGround == null)
+        {
+            _fallbackGround = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            _fallbackGround.name = "HellsingFallbackGround";
+            _fallbackGround.transform.localScale = new Vector3(500f, 1f, 500f);
+            int groundLayer = LayerMask.NameToLayer("Ground");
+            if (groundLayer >= 0)
+            {
+                _fallbackGround.layer = groundLayer;
+            }
+            var mr = _fallbackGround.GetComponent<MeshRenderer>();
+            if (mr != null)
+            {
+                Shader lit = Shader.Find("Universal Render Pipeline/Lit");
+                if (lit != null)
+                {
+                    Material mat = new Material(lit);
+                    mat.color = new Color(0.42f, 0.40f, 0.37f);
+                    mat.SetFloat("_Smoothness", 0.15f);
+                    Texture2D tex = Resources.Load<Texture2D>("Data/Textures/field_deco_T/d_ston01");
+                    if (tex != null)
+                    {
+                        mat.SetTexture("_BaseMap", tex);
+                        mat.mainTextureScale = new Vector2(800f, 800f);
+                    }
+                    mr.sharedMaterial = mat;
+                }
+            }
+        }
+        if (Vector2.Distance(new Vector2(_fallbackGround.transform.position.x, _fallbackGround.transform.position.z), new Vector2(pos.x, pos.z)) > 500f ||
+            Mathf.Abs(_fallbackGround.transform.position.y - pos.y) > 25f)
+        {
+            _fallbackGround.transform.position = new Vector3(pos.x, pos.y, pos.z);
+        }
     }
 
     public Task UpdateObjectPosition(int id, Vector3 position)
@@ -125,6 +166,10 @@ public class World : MonoBehaviour
 
     public Task UpdateObjectDestination(int id, Vector3 currentPosition, Vector3 destination)
     {
+        if (id == GameClient.Instance.CurrentPlayerId)
+        {
+            return Task.CompletedTask;
+        }
         return _worldSpawner.ExecuteWithEntityAsync(id, e =>
         {
             e.Identity.Position = currentPosition;

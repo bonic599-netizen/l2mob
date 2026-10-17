@@ -4,7 +4,7 @@ using System.Collections;
 
 public class L2LoginUI : L2UI
 {
-    [SerializeField] private VisualElement _loadingElement;
+    private VisualElement _loadingElement;
 
     private static L2LoginUI _instance;
     public static L2LoginUI Instance { get { return _instance; } }

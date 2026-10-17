@@ -50,26 +50,20 @@ public class ServerListPacket : LoginServerPacket
             serverData.ip[3] = ReadB();
 
             serverData.port = ReadI();
-            serverData.currentPlayers = ReadI();
-            serverData.maxPlayers = ReadI();
-            serverData.status = ReadB();
+            byte ageLimit = ReadB();
+            byte isPvp = ReadB();
+            serverData.currentPlayers = ReadH();
+            serverData.maxPlayers = ReadH();
+            byte rawStatus = ReadB();
+            int serverType = ReadI();
+            byte brackets = ReadB();
 
-            Debug.Log($"Server data received: Id:{serverData.serverId} Ip:{StringUtils.ByteArrayToString(serverData.ip)} Port:{serverData.port} OnlineCount:{serverData.currentPlayers} MaxPlayers:{serverData.maxPlayers} Status:{serverData.status}");
+            // In Interlude, rawStatus == 1 means Server Up ("Normal"/"Light"), 0 means "Down"
+            serverData.status = rawStatus == 1 ? 1 : 4;
+
+            Debug.Log($"Server data received: Id:{serverData.serverId} Ip:{StringUtils.ByteArrayToIpAddress(serverData.ip)} Port:{serverData.port} OnlineCount:{serverData.currentPlayers} MaxPlayers:{serverData.maxPlayers} Status:{serverData.status}");
             _serverData.Add(serverData);
+            _charsOnServers[serverData.serverId] = 0;
         }
-
-        byte charsOnServerCount = ReadB();
-        if (charsOnServerCount > 0)
-        {
-            for (int i = 0; i < charsOnServerCount; i++)
-            {
-                byte serverId = ReadB();
-                byte charCount = ReadB();
-
-                Debug.Log($"Account as {charCount} character(s) on server {serverId}");
-                _charsOnServers[serverId] = charCount;
-            }
-        }
-
     }
 }

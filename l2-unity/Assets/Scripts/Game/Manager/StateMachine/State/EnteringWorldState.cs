@@ -33,12 +33,12 @@ public class EnteringWorldState : GameStateBase
 
                 WorldClock.Instance.SynchronizeClock(playerInfo.CurrentGameTime);
 
-                // Only spawn player once we loaded the world
-                WorldSpawner.Instance.OnReceivePlayerInfo(playerInfo.Identity, playerInfo.Status, playerInfo.Stats, playerInfo.Appearance, playerInfo.EntityActionInfo);
-
                 PlayerStateMachine.Instance.enabled = true;
 
                 _stateMachine.ChangeState(GameState.IN_GAME, false);
+
+                // Only spawn player once we loaded the world
+                WorldSpawner.Instance.OnReceivePlayerInfo(playerInfo.Identity, playerInfo.Status, playerInfo.Stats, playerInfo.Appearance, playerInfo.EntityActionInfo);
                 break;
             case GameEvent.GAME_DISCONNECTED:
                 _stateMachine.ChangeState(GameState.DISONNECTING);

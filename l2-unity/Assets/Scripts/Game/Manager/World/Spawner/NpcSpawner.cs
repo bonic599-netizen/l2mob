@@ -26,10 +26,26 @@ public class NpcSpawner : EntitySpawnStrategy<Appearance, Stats, NpcStatus>
         Npcgrp npcgrp = NpcgrpTable.Instance.GetNpcgrp(identity.NpcId);
         NpcName npcName = NpcNameTable.Instance.GetNpcName(identity.NpcId);
 
-        if (npcName == null || npcgrp == null)
+        if (npcgrp == null)
         {
-            Debug.LogError($"Npc {identity.NpcId} could not be loaded correctly.");
-            return;
+            npcgrp = new Npcgrp
+            {
+                NpcId = identity.NpcId,
+                ClassName = "LineageNPC.a_teleporter_FDwarf",
+                Mesh = "LineageNPCs.a_smith_MDwarf_m00",
+                Type = EntityType.NPC,
+                HpVisible = true
+            };
+        }
+        if (npcName == null)
+        {
+            npcName = new NpcName
+            {
+                Id = identity.NpcId,
+                Name = !string.IsNullOrEmpty(identity.Name) ? identity.Name : $"NPC #{identity.NpcId}",
+                Title = identity.Title ?? "",
+                TitleColor = 0x9CE8A9
+            };
         }
 
         identity.EntityType = npcgrp.Type;
@@ -64,7 +80,7 @@ public class NpcSpawner : EntitySpawnStrategy<Appearance, Stats, NpcStatus>
         }
 
         npc.Appearance.ServerTitleColor = npcName.TitleColor;
-        npcGo.transform.name = identity.Name;
+        npcGo.transform.name = npc.Identity.Name;
         npcGo.SetActive(true);
 
         npc.Status = status;

@@ -7,6 +7,7 @@ public enum LoginServerPacketType : byte
     LoginOk = 3,
     ServerList = 4,
     PlayFail = 6,
-    PlayOk = 7
+    PlayOk = 7,
+    GGAuth = 11
 }
 

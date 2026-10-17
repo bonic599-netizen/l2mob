@@ -11,7 +11,7 @@ public class TargetManager : MonoBehaviour
 
     [SerializeField] private float _maximumTargetDistance = 15f;
     [SerializeField] private LayerMask _entityMask;
-    [SerializeField] private RaycastHit[] _entitiesInRange;
+    private RaycastHit[] _entitiesInRange;
     [SerializeField] private List<Transform> _visibleEntities;
     [SerializeField] private int _nextTargetIndex;
 
