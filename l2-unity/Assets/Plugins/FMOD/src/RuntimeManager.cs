@@ -565,7 +565,11 @@ retry:
         {
             if (studioSystem.isValid() && isOverlayEnabled)
             {
+#if !UNITY_6000_0_OR_NEWER
                 windowRect = GUI.Window(GetInstanceID(), windowRect, DrawDebugOverlay, "FMOD Studio Debug");
+#else
+                windowRect = GUI.Window(GetHashCode(), windowRect, DrawDebugOverlay, "FMOD Studio Debug");
+#endif
             }
         }
 

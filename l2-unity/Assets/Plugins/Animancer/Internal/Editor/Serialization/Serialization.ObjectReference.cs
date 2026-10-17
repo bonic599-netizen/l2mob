@@ -51,18 +51,28 @@ namespace Animancer.Editor
             public ObjectReference(Object obj)
             {
                 _Object = obj;
+#if !UNITY_6000_0_OR_NEWER
                 if (obj != null)
                     _InstanceID = obj.GetInstanceID();
+#else
+                if (obj != null)
+                    _InstanceID = obj.GetHashCode();
+#endif
             }
 
             /************************************************************************************************************************/
 
             private void Initialize()
             {
+#if !UNITY_6000_0_OR_NEWER
                 if (_Object == null)
                     _Object = EditorUtility.InstanceIDToObject(_InstanceID);
                 else
                     _InstanceID = _Object.GetInstanceID();
+#else
+                if (_Object != null)
+                    _InstanceID = _Object.GetHashCode();
+#endif
             }
 
             /************************************************************************************************************************/

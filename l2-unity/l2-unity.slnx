@@ -1,7 +1,7 @@
 ﻿<Solution>
   <Project Path="Animancer.FSM.csproj" />
-  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Unity.RenderPipelines.Universal.Runtime.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
   <Project Path="Animancer.csproj" />
   <Project Path="Boxophobic.AtmosphericHeightFog.Runtime.csproj" />
   <Project Path="Boxophobic.Utils.Editor.csproj" />

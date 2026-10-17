@@ -372,6 +372,7 @@ namespace Beautify.Universal {
                 return isActive;
             }
 
+#if !UNITY_6000_0_OR_NEWER
 #if UNITY_2023_3_OR_NEWER
             [Obsolete]
 #endif
@@ -422,6 +423,7 @@ namespace Beautify.Universal {
                     ConfigureInput(ScriptableRenderPassInput.Depth);
                 }
             }
+#endif
 
 #if UNITY_2022_1_OR_NEWER
             public void SetupRenderTargets(ScriptableRenderer renderer) {
@@ -440,6 +442,7 @@ namespace Beautify.Universal {
 
 
 
+#if !UNITY_6000_0_OR_NEWER
 #if UNITY_2023_3_OR_NEWER
             [Obsolete]
 #endif
@@ -467,6 +470,7 @@ namespace Beautify.Universal {
 
                 CommandBufferPool.Release(cmd);
             }
+#endif
 
 
 #if UNITY_2023_3_OR_NEWER
@@ -2003,6 +2007,7 @@ namespace Beautify.Universal {
             }
 #endif
 
+#if !UNITY_6000_0_OR_NEWER
 #if UNITY_2023_3_OR_NEWER
             [Obsolete]
 #endif
@@ -2038,6 +2043,7 @@ namespace Beautify.Universal {
                 context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref filter);
 #endif
             }
+#endif
 
 #if UNITY_2023_3_OR_NEWER
             class PassData {
@@ -2136,6 +2142,7 @@ namespace Beautify.Universal {
             }
 #endif
 
+#if !UNITY_6000_0_OR_NEWER
 #if UNITY_2023_3_OR_NEWER
             [Obsolete]
 #endif
@@ -2168,6 +2175,7 @@ namespace Beautify.Universal {
                 context.DrawRenderers(renderingData.cullResults, ref drawingSettings, ref filter);
 #endif
             }
+#endif
 
 #if UNITY_2023_3_OR_NEWER
             class PassData {
@@ -2267,6 +2275,7 @@ namespace Beautify.Universal {
                 }
             }
 
+#if !UNITY_6000_0_OR_NEWER
 #if UNITY_2023_3_OR_NEWER
             [Obsolete]
 #endif
@@ -2357,6 +2366,7 @@ namespace Beautify.Universal {
                 context.ExecuteCommandBuffer(cmd);
                 CommandBufferPool.Release(cmd);
             }
+#endif
 
 
 #if UNITY_2023_3_OR_NEWER
@@ -2492,6 +2502,7 @@ namespace Beautify.Universal {
                 m_ShaderTagIdList.Add(new ShaderTagId("LightweightForward"));
             }
 
+#if !UNITY_6000_0_OR_NEWER
 #if UNITY_2023_3_OR_NEWER
             [Obsolete]
 #endif
@@ -2584,6 +2595,7 @@ namespace Beautify.Universal {
 #endif
 
             }
+#endif
 
 
 #if UNITY_2023_3_OR_NEWER
@@ -2684,6 +2696,7 @@ namespace Beautify.Universal {
                 renderPassEvent = RenderPassEvent.BeforeRenderingOpaques;
             }
 
+#if !UNITY_6000_0_OR_NEWER
 #if UNITY_2023_3_OR_NEWER
             [Obsolete]
 #endif
@@ -2694,6 +2707,7 @@ namespace Beautify.Universal {
                 context.ExecuteCommandBuffer(cmd);
                 CommandBufferPool.Release(cmd);
             }
+#endif
 
 #if UNITY_2023_3_OR_NEWER
             public override void RecordRenderGraph(RenderGraph renderGraph, ContextContainer frameData) {
@@ -2769,7 +2783,7 @@ namespace Beautify.Universal {
             shader = Shader.Find("Hidden/Kronnect/Beautify");
         }
 
-#if UNITY_2022_1_OR_NEWER
+#if UNITY_2022_1_OR_NEWER && !UNITY_6000_0_OR_NEWER
         public override void SetupRenderPasses(ScriptableRenderer renderer,
                                       in RenderingData renderingData) {
 
