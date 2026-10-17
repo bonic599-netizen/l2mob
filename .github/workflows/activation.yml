@@ -1,6 +1,8 @@
 name: Acquire Unity Activation File
 
 on:
+  push:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
