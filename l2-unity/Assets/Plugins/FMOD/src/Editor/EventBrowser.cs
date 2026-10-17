@@ -105,7 +105,11 @@ namespace FMODUnity
             treeView.Reload();
         }
 
+#if UNITY_6000_0_OR_NEWER
+        private class TreeView : UnityEditor.IMGUI.Controls.TreeView<int>
+#else
         private class TreeView : UnityEditor.IMGUI.Controls.TreeView
+#endif
         {
             private static readonly Texture2D folderOpenIcon = EditorUtils.LoadImage("FolderIconOpen.png");
             private static readonly Texture2D folderClosedIcon = EditorUtils.LoadImage("FolderIconClosed.png");
