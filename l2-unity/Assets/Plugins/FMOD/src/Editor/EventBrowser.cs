@@ -1672,7 +1672,7 @@ namespace FMODUnity
 
         // This is an event handler on the hierachy view to handle dragging our objects from the browser
 #if UNITY_6000_0_OR_NEWER
-        private void HierarchyUpdate(UnityEditor.EntityId instance, Rect rect)
+        private void HierarchyUpdate(UnityEngine.EntityId instance, Rect rect)
 #else
         private void HierarchyUpdate(int instance, Rect rect)
 #endif
