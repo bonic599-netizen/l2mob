@@ -1,0 +1,71 @@
+name: Build Lineage 2 Mobile (iOS IPA)
+
+on:
+  workflow_dispatch:
+    inputs:
+      unityVersion:
+        description: 'Unity Editor Version'
+        required: false
+        default: '6000.3.21f1'
+  push:
+    branches:
+      - main
+
+jobs:
+  build-ios:
+    name: Build iOS Xcode & IPA
+    runs-on: macos-14
+    timeout-minutes: 90
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Cache Unity Library
+        uses: actions/cache@v3
+        with:
+          path: l2-unity/Library
+          key: Library-iOS-${{ hashFiles('l2-unity/Assets/**', 'l2-unity/ProjectSettings/**') }}
+          restore-keys: |
+            Library-iOS-
+
+      - name: Build Unity iOS Project
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+          UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+          UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+        with:
+          projectPath: l2-unity
+          unityVersion: ${{ github.event.inputs.unityVersion || '6000.3.21f1' }}
+          targetPlatform: iOS
+          buildsPath: build
+
+      - name: Build and Package iOS IPA
+        run: |
+          cd build/iOS
+          echo "=== Generating Xcode Archive ==="
+          xcodebuild archive \
+            -workspace Unity-iPhone.xcworkspace \
+            -scheme Unity-iPhone \
+            -configuration Release \
+            -archivePath build/Unity-iPhone.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            AD_HOC_CODE_SIGNING_ALLOWED=YES
+
+          echo "=== Exporting Payload for IPA ==="
+          mkdir -p build/Payload
+          cp -r build/Unity-iPhone.xcarchive/Products/Applications/Unity-iPhone.app build/Payload/
+          cd build
+          zip -r Lineage2_Mobile_iOS.ipa Payload
+          echo "IPA Created successfully!"
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lineage2_Mobile_iOS
+          path: build/iOS/build/Lineage2_Mobile_iOS.ipa
+          retention-days: 14
