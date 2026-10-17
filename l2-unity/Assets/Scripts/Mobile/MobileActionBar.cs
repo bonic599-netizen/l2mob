@@ -81,34 +81,13 @@ public class MobileActionBar : MonoBehaviour
 
     public void OnNextTargetClicked()
     {
-        // Select next monster
-        if (World.Instance != null && PlayerStateMachine.Instance != null)
+        if (PlayerActions.Instance != null)
         {
-            Vector3 myPos = PlayerStateMachine.Instance.transform.position;
-            float closestDist = float.MaxValue;
-            ObjectData closestMob = null;
-
-            // Find closest monster within 1200 range
-            if (World.Instance.Monsters != null)
-            {
-                foreach (var monster in World.Instance.Monsters)
-                {
-                    if (monster == null || monster.Entity.Status.IsDead)
-                        continue;
-
-                    float dist = Vector3.Distance(myPos, monster.ObjectTransform.position);
-                    if (dist < 1200f && dist < closestDist)
-                    {
-                        closestDist = dist;
-                        closestMob = monster;
-                    }
-                }
-            }
-
-            if (closestMob != null && TargetManager.Instance != null)
-            {
-                TargetManager.Instance.SetTarget(closestMob);
-            }
+            PlayerActions.Instance.UseAction(ActionType.NextTarget);
+        }
+        else if (TargetManager.Instance != null)
+        {
+            TargetManager.Instance.NextTarget();
         }
     }
 
@@ -124,7 +103,7 @@ public class MobileActionBar : MonoBehaviour
     {
         if (PlayerActions.Instance != null)
         {
-            PlayerActions.Instance.UseAction(ActionType.SitStand);
+            PlayerActions.Instance.UseAction(ActionType.Sit);
         }
     }
 
@@ -132,32 +111,35 @@ public class MobileActionBar : MonoBehaviour
     {
         if (PlayerShortcuts.Instance != null)
         {
-            // Execute shortcut from page 0, slot
-            PlayerShortcuts.Instance.UseShortcut(0, slot);
+            var shortcut = PlayerShortcuts.Instance.GetShortcutBySlot(slot);
+            if (shortcut != null)
+            {
+                PlayerShortcuts.Instance.UseShortcut(shortcut);
+            }
         }
     }
 
     public void ToggleInventory()
     {
         if (InventoryWindow.Instance != null)
-            InventoryWindow.Instance.ToggleVisibility();
+            InventoryWindow.Instance.ToggleHideWindow();
     }
 
     public void ToggleCharacterStatus()
     {
-        if (CharacterStatusWindow.Instance != null)
-            CharacterStatusWindow.Instance.ToggleVisibility();
+        if (CharacterInfoWindow.Instance != null)
+            CharacterInfoWindow.Instance.ToggleHideWindow();
     }
 
     public void ToggleChat()
     {
         if (ChatWindow.Instance != null)
-            ChatWindow.Instance.ToggleVisibility();
+            ChatWindow.Instance.ToggleHideWindow();
     }
 
     public void ToggleSystemMenu()
     {
         if (SystemMenuWindow.Instance != null)
-            SystemMenuWindow.Instance.ToggleVisibility();
+            SystemMenuWindow.Instance.ToggleHideWindow();
     }
 }
