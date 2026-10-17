@@ -2,11 +2,6 @@ name: Build Lineage 2 Mobile (iOS IPA)
 
 on:
   workflow_dispatch:
-    inputs:
-      unityVersion:
-        description: 'Unity Editor Version'
-        required: false
-        default: '6000.3.21f1'
   push:
     branches:
       - main
@@ -23,7 +18,7 @@ jobs:
           lfs: true
 
       - name: Cache Unity Library
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: l2-unity/Library
           key: Library-iOS-${{ hashFiles('l2-unity/Assets/**', 'l2-unity/ProjectSettings/**') }}
@@ -37,25 +32,62 @@ jobs:
           sudo mkdir -p "/Library/Application Support/Unity"
           echo "$UNITY_LICENSE" | sudo tee "/Library/Application Support/Unity/Unity_lic.ulf" > /dev/null
           sudo chmod 644 "/Library/Application Support/Unity/Unity_lic.ulf"
-          echo "Unity license installed successfully."
+          echo "Unity license file installed."
+
+      - name: Install Unity Editor with iOS Support
+        run: |
+          if [ ! -d "/Applications/Unity Hub.app" ]; then
+            echo "=== Installing Unity Hub via brew ==="
+            brew install --cask unity-hub
+          fi
+          
+          if [ ! -d "/Applications/Unity/Hub/Editor/6000.3.21f1" ]; then
+            echo "=== Installing Unity 6000.3.21f1 with iOS module ==="
+            "/Applications/Unity Hub.app/Contents/MacOS/Unity Hub" -- --headless install \
+              --version 6000.3.21f1 \
+              --changeset c02631ffc030 \
+              --module ios \
+              --architecture arm64 \
+              --childModules
+          else
+            echo "Unity 6000.3.21f1 already installed."
+          fi
 
       - name: Build Unity iOS Project
-        uses: game-ci/unity-builder@v4
-        env:
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
-          SKIP_ACTIVATION: "true"
-        with:
-          projectPath: l2-unity
-          unityVersion: ${{ github.event.inputs.unityVersion || '6000.3.21f1' }}
-          targetPlatform: iOS
-          buildsPath: build
+        run: |
+          UNITY_BIN="/Applications/Unity/Hub/Editor/6000.3.21f1/Unity.app/Contents/MacOS/Unity"
+          mkdir -p build/iOS
+          
+          echo "=== Starting Unity iOS Build ==="
+          "$UNITY_BIN" \
+            -batchmode \
+            -quit \
+            -nographics \
+            -logFile unity_build.log \
+            -projectPath l2-unity \
+            -buildTarget iOS \
+            -executeMethod MobileBuildScript.BuildIOS || true
+          
+          cat unity_build.log
+          
+          if [ ! -f "build/iOS/Unity-iPhone.xcodeproj/project.pbxproj" ] && [ ! -d "build/iOS/Unity-iPhone.xcworkspace" ]; then
+            echo "ERROR: Xcode project was not generated!"
+            exit 1
+          fi
 
       - name: Build and Package iOS IPA
         run: |
           cd build/iOS
           echo "=== Generating Xcode Archive ==="
+          
+          if [ -d "Unity-iPhone.xcworkspace" ]; then
+            PROJECT_ARG="-workspace Unity-iPhone.xcworkspace"
+          else
+            PROJECT_ARG="-project Unity-iPhone.xcodeproj"
+          fi
+          
           xcodebuild archive \
-            -workspace Unity-iPhone.xcworkspace \
+            $PROJECT_ARG \
             -scheme Unity-iPhone \
             -configuration Release \
             -archivePath build/Unity-iPhone.xcarchive \
@@ -63,17 +95,18 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             AD_HOC_CODE_SIGNING_ALLOWED=YES
-
+          
           echo "=== Exporting Payload for IPA ==="
           mkdir -p build/Payload
           cp -r build/Unity-iPhone.xcarchive/Products/Applications/Unity-iPhone.app build/Payload/
           cd build
-          zip -r Lineage2_Mobile_iOS.ipa Payload
-          echo "IPA Created successfully!"
+          zip -r Lineage2Mobile.ipa Payload
+          echo "Lineage2Mobile.ipa successfully created!"
+          ls -lh Lineage2Mobile.ipa
 
       - name: Upload IPA Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Lineage2_Mobile_iOS
-          path: build/iOS/build/Lineage2_Mobile_iOS.ipa
-          retention-days: 14
+          name: Lineage2Mobile-iOS-IPA
+          path: build/iOS/build/Lineage2Mobile.ipa
+          if-no-files-found: error
