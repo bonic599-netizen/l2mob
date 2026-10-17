@@ -81,7 +81,6 @@ public class MusicAreaTrigger : MonoBehaviour
     {
         if (MusicManager.Instance == null)
         {
-            Debug.LogWarning("MusicManager is not initialized.");
             return;
         }
 

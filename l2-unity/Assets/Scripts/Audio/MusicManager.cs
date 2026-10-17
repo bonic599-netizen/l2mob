@@ -12,16 +12,47 @@ public class MusicManager : MonoBehaviour
     public EventReference CurrentMusicEvent { get { return _currentMusicEvent; } }
 
     private static MusicManager _instance;
-    public static MusicManager Instance { get { return _instance; } }
+    public static MusicManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+#if UNITY_2023_1_OR_NEWER
+                _instance = Object.FindFirstObjectByType<MusicManager>();
+#else
+                _instance = Object.FindObjectOfType<MusicManager>();
+#endif
+                if (_instance == null)
+                {
+                    GameObject go = new GameObject("MusicManager");
+                    _instance = go.AddComponent<MusicManager>();
+                    if (Application.isPlaying)
+                    {
+                        DontDestroyOnLoad(go);
+                    }
+                }
+            }
+            return _instance;
+        }
+    }
 
     private void Awake() {
         if (_instance == null) {
             _instance = this;
+            if (transform.parent == null && Application.isPlaying)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
         } else if(_instance != this){
-            Destroy(this);
+            Destroy(gameObject);
+            return;
         }
 
-        _musicInstances = new Dictionary<EventReference, EventInstance>();
+        if (_musicInstances == null)
+        {
+            _musicInstances = new Dictionary<EventReference, EventInstance>();
+        }
     }
 
     void OnDestroy() {
@@ -31,7 +62,10 @@ public class MusicManager : MonoBehaviour
     public void Clear() {
         ResetPriority();
         StopMusic(CurrentMusicEvent);
-        _musicInstances.Clear();
+        if (_musicInstances != null)
+        {
+            _musicInstances.Clear();
+        }
     }
 
     public void PlayMusic(EventReference musicEvent, int priority) {
@@ -39,8 +73,17 @@ public class MusicManager : MonoBehaviour
             return;
         }
 
+        if (musicEvent.IsNull) {
+            return;
+        }
+
         _currentEventPriority = priority;
         _currentMusicEvent = musicEvent;
+
+        if (_musicInstances == null)
+        {
+            _musicInstances = new Dictionary<EventReference, EventInstance>();
+        }
 
         if (_musicInstances.ContainsKey(musicEvent)) {
             _musicInstances[musicEvent].start();
@@ -54,7 +97,7 @@ public class MusicManager : MonoBehaviour
     }
 
     public void StopMusic(EventReference musicEvent) {
-        if(_musicInstances.ContainsKey(musicEvent)) {
+        if(_musicInstances != null && _musicInstances.ContainsKey(musicEvent)) {
             _musicInstances[musicEvent].stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
         }             
     }
